@@ -89,13 +89,6 @@
       setCategories(updated);
     };
 
-    const editCategoryCount = (index: number, newValue: number) => {
-      if (newValue < 0) return;
-      const updated = [...categories];
-      updated[index].count = newValue;
-      setCategories(updated);
-    };
-
     const resetCount = (index: number) => {
       const updated = [...categories];
       updated[index].count = 0;

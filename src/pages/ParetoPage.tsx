@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -19,7 +18,6 @@ interface Row {
 }
 
 const ParetoPage = () => {
-  const { t } = useTranslation();
   const chartRef = useRef<ParetoChartHandle | null>(null);
 
   // ===================== STATE =========================

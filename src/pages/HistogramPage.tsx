@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import HistogramChart from "../components/charts/HistogramChart";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -7,7 +6,6 @@ import autoTable from "jspdf-autotable";
 import Papa from "papaparse";
 
 const HistogramPage = () => {
-  const { t } = useTranslation();
 
   const [inputData, setInputData] = useState("");
   const [numbers, setNumbers] = useState<number[]>([]);
