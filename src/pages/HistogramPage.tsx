@@ -41,11 +41,19 @@ const HistogramPage = () => {
       ? sorted[Math.floor(sorted.length / 2)]
       : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
 
-  const mode = (() => {
-    const freq: Record<number, number> = {};
-    numbers.forEach((n) => (freq[n] = (freq[n] || 0) + 1));
-    return Number(Object.keys(freq).reduce((a, b) => (freq[a] > freq[b] ? a : b), "0"));
-  })();
+const mode = (() => {
+  const freq: Record<number, number> = {};
+  numbers.forEach((n) => {
+    freq[n] = (freq[n] || 0) + 1;
+  });
+
+  return Number(
+    Object.keys(freq)
+      .map(Number)
+      .reduce((a, b) => (freq[a] > freq[b] ? a : b), 0)
+  );
+})();
+
 
   const range = numbers.length > 0 ? sorted[sorted.length - 1] - sorted[0] : 0;
 

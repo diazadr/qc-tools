@@ -45,7 +45,7 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
       },
       tooltip: {
         trigger: "axis",
-        formatter: (params) => {
+        formatter: (params: any) => {
           const bar = params[0];
           const line = params[1];
           return `

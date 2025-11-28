@@ -167,16 +167,17 @@
       autoTable(doc, {
         startY: 24,
         head: [["Kategori", "Tally", "Jumlah", "%", "Operator", "Shift", "Line", "Tanggal"]],
-        body: categories.map(cat => [
-          cat.name,
-          renderTally(cat.count),
-          cat.count,
-          totalCount === 0 ? "0%" : ((cat.count / totalCount) * 100).toFixed(1) + "%",
-          cat.operator,
-          cat.shift,
-          cat.line,
-          cat.date,
-        ]),
+       body: categories.map(cat => [
+  cat.name || "",
+  renderTally(cat.count) || "",
+  cat.count || 0,
+  totalCount === 0 ? "0%" : ((cat.count / totalCount) * 100).toFixed(1) + "%",
+  cat.operator || "",
+  cat.shift || "",
+  cat.line || "",
+  cat.date || "",
+]) as (string | number)[][],
+
       });
       doc.save("checksheet.pdf");
     };

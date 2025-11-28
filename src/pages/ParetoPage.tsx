@@ -199,16 +199,18 @@ const ParetoPage = () => {
     autoTable(doc, {
       startY: 20,
       head: [["Kategori", "Jumlah", "%", "Kumulatif%", "Operator", "Shift", "Line", "Tanggal"]],
-      body: tableRows.map(r => [
-        r.category,
-        r.count,
-        r.percentage + (normalize ? "" : "%"),
-        r.cumulativePercentage + "%",
-        r.operator,
-        r.shift,
-        r.line,
-        r.date,
-      ]),
+ body: tableRows.map(r => [
+  r.category || "",
+  r.count || 0,
+  r.percentage + (normalize ? "" : "%") || "",
+  r.cumulativePercentage + "%" || "",
+  r.operator || "",
+  r.shift || "",
+  r.line || "",
+  r.date || "",
+]),
+
+
     });
 
     doc.text("Kesimpulan:", 12, doc.lastAutoTable.finalY + 10);
