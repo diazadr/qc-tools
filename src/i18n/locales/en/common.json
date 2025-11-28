@@ -1,0 +1,198 @@
+{
+"landing": {
+  "hero1": "Industrial-grade",
+  "hero2": "QC Tools",
+  "hero3": "for real manufacturing use",
+  "subtitle": "Generate Check Sheet, Pareto Chart, and Histogram — free and completely offline.",
+  "use": "Use Now",
+  "features": "Main Features",
+  "f1": "Import data from Excel",
+  "f2": "Export to PDF",
+  "f3": "Browser-based processing",
+  "f4": "No data storage",
+  "f5": "Free to use",
+  "f6": "Fast and reliable",
+ "who": "Who Uses This?",
+  "who1_title": "Manufacturing & factories",
+  "who1_desc": "Used for production defect tracking, inspection and quality analysis.",
+
+  "who2_title": "Industrial & engineering students",
+  "who2_desc": "Used for QC assignments, thesis projects, and academic research.",
+
+  "who3_title": "QA / QC departments",
+  "who3_desc": "Used for daily measurement analysis and continuous improvement.",
+
+  "available": "Available Tools",
+  "t1_title": "Check Sheet",
+  "t1_desc": "Collect defect frequency in structured QC form",
+
+  "t2_title": "Pareto Chart",
+  "t2_desc": "Identify dominant defect causes using the 80/20 rule.",
+
+  "t3_title": "Histogram",
+  "t3_desc": "Visualize numeric data distribution for quality insights."
+},
+
+"workflow": {
+  "title": "3 Core QC Methods",
+  "subtitle": "From raw defect logging to pattern analysis and statistical distribution.",
+  "w1_title": "Check Sheet",
+  "w1_desc": "Captures defect occurrence frequencies directly from production.",
+  "w2_title": "Pareto Chart",
+  "w2_desc": "Identifies dominant defect contributors using the 80/20 rule.",
+  "w3_title": "Histogram",
+  "w3_desc": "Analyzes distribution to understand variability and process behavior."
+},
+
+"lang_name_id": "Indonesian",
+"lang_name_en": "English",
+
+  "toolselector": {
+    "title": "Select Your QC Tools",
+    "desc": "You can use one or multiple tools.",
+    "cs": "Check Sheet",
+    "pareto": "Pareto Diagram",
+    "hist": "Histogram",
+    "comb": "Combine QC Report",
+    "cs_desc": "Calculate defect category frequency & produce QC table.",
+    "pareto_desc": "Visualize defect contribution using the 80/20 rule.",
+    "hist_desc": "Analyze numerical data distribution and statistics."
+  },
+
+  "checksheet": {
+    "title": "Check Sheet Generator",
+    "input": "Input Defect Category",
+    "placeholder": "Category Name",
+    "add": "Add",
+    "result": "Check Sheet Result",
+    "col_category": "Category",
+    "col_count": "Count",
+    "col_inc": "+1",
+    "col_percent": "%",
+    "col_delete": "Delete",
+    "total": "Total items:",
+    "importexport": "Import & Export Data",
+    "upload": "Upload Excel",
+    "exp_pdf": "Export PDF",
+    "exp_excel": "Export Excel",
+    "exp_csv": "Export CSV",
+    "privacy": "Data is only processed in browser. Nothing is stored on server."
+  },
+
+  "histogram": {
+  "title": "Histogram Generator",
+  "input": "Input Numerical Data",
+  "placeholder": "Enter numbers separated by space or comma...",
+  "process": "Process Data",
+  "bins": "Number of Bins",
+  "chart": "Histogram Plot",
+  "stats": "Statistics",
+  "mean": "Mean",
+  "median": "Median"
+},
+
+"sample": {
+  "title": "Sample Data",
+  "cs": "Check Sheet Sample",
+  "pareto": "Pareto Sample",
+  "hist": "Histogram Sample",
+  "preview": "Preview Data",
+  "usedata": "Use This Data"
+},
+
+"report": {
+  "title": "QC Report Builder",
+  "select": "Select tools to include:",
+  "meta": "Report Metadata",
+  "project": "Project Name",
+  "company": "Company / University",
+  "line": "Production Line",
+  "date": "Date",
+  "creator": "Prepared by",
+  "generate": "Generate Final PDF Report"
+},
+
+"faq": {
+  "title": "FAQ — Quality Tools in Manufacturing",
+
+  "q1": "What is a Check Sheet?",
+  "a1": "A Check Sheet is a structured QC table used to collect frequency of defect occurrences directly from manufacturing processes.",
+
+  "q2": "What is a Pareto Diagram?",
+  "a2": "A Pareto Diagram is a QC chart used to identify vital defect causes that contribute to 80% of quality problems.",
+
+  "q3": "What is a Histogram?",
+  "a3": "In industrial quality, a Histogram is used to visualize distribution of measurement data such as dimension, thickness, or tolerance deviation.",
+
+  "q4": "How do I upload data from Excel?",
+  "a4": "Click 'Upload Excel' and select a sheet containing columns for categories and counts.",
+
+  "q5": "Is any production data stored?",
+  "a5": "No. Your QC data never leaves your browser. Nothing is uploaded.",
+
+  "q6": "Is this tool free for industry use?",
+  "a6": "Yes. The platform is 100% free for engineering, industry, students, and research purposes.",
+
+  "q7": "Is this tool usable on factory floor tablets?",
+  "a7": "Yes. QC Tools is responsive and can be used on mobile or industrial touchscreen terminals."
+},
+
+"about": {
+  "title": "About QC Tools",
+  "purpose_desc": "QC Tools was created to provide practical, high-accuracy data analysis for real industrial environments, lab research, process improvement, production inspection and engineering education.",
+  "background_desc": "The tools are based on established quality methodologies used in real factories — including Six Sigma, SPC, MSA, Lean and ISO-based monitoring systems.",
+  "design_desc": "The interface is designed to match industrial QC environments — clean layout, high contrast, functional structure, with minimal UI noise.",
+  "credit_desc": "Developed for the quality community: students, factory users, engineers, and industrial professionals."
+},
+
+
+"privacy": {
+  "title": "Data Privacy",
+  "p1": "QC Tools never transmits any data outside your device.",
+  "p2": "All calculations and processing happen locally in your browser.",
+  "p3": "No personal identity or credentials are requested.",
+  "p4": "No analytics or hidden telemetry runs in the background.",
+  "p5": "Safe for confidential production environments.",
+  "p6": "All results should be treated as internal QC documentation."
+},
+
+
+"nav": {
+  "home": "Home",
+  "tools": "QC Tools",
+  "sample": "Sample Data",
+  "faq": "FAQ",
+  "about": "About",
+  "privacy": "Terms & Privacy"
+},
+
+  "footer": {
+    "description": "QC Tools provides industrial-grade quality analysis supporting students, professionals and real manufacturing environments. Used globally in quality control applications for accuracy, speed and reliability.",
+    "qctools": "QC Tools",
+    "tools": "Tools",
+    "sampledata": "Sample Data",
+    "faq": "FAQ",
+    "about": "About",
+    "privacy": "Privacy Policy",
+    "support": "Support",
+    "contact": "Contact Us",
+    "terms": "Terms & Conditions",
+    "docs": "Documentation",
+    "api": "API Info",
+    "ri,ghts": "All rights reserved."
+  },
+
+"highlight": {
+  "scalable_title": "Skalabel",
+  "scalable_desc": "Mampu menangani kebutuhan data QC yang terus bertambah, mendukung ekspansi produksi dan analisa defect yang lebih besar.",
+
+  "secure_title": "Aman & Lokal",
+  "secure_desc": "Seluruh pemrosesan dilakukan secara lokal di browser. Tidak ada upload ke cloud. Cocok untuk lingkungan manufaktur dengan data rahasia.",
+
+  "fast_title": "Cepat & Responsif",
+  "fast_desc": "Analisa instan tanpa delay — dioptimalkan untuk inspeksi kualitas real-time di lantai produksi."
+}
+
+
+
+}

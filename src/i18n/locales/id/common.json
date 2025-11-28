@@ -1,0 +1,195 @@
+{
+  "landing": {
+  "hero1": "QC Tools",
+  "hero2": "berstandar industri",
+  "hero3": "untuk lingkungan manufaktur nyata",
+  "subtitle": "Membuat Check Sheet, Pareto, dan Histogram — gratis & sepenuhnya offline.",
+  "use": "Mulai Sekarang",
+  "features": "Fitur Utama",
+  "f1": "Import data dari Excel",
+  "f2": "Export ke PDF",
+  "f3": "Pemrosesan di browser",
+  "f4": "Tidak ada penyimpanan data",
+  "f5": "Gratis digunakan",
+  "f6": "Cepat dan andal",
+  "who": "Digunakan oleh",
+  "who1_title": "Industri manufaktur & pabrik",
+  "who1_desc": "Digunakan untuk tracking defect produksi, inspeksi, dan analisa kualitas.",
+
+  "who2_title": "Mahasiswa teknik & engineering",
+  "who2_desc": "Digunakan untuk tugas QC, penelitian, dan proyek akademik.",
+
+  "who3_title": "Departemen QA / QC",
+  "who3_desc": "Digunakan untuk analisa pengukuran harian dan continuous improvement.",
+
+  "available": "Tools yang Tersedia",
+  "t1_title": "Check Sheet",
+  "t1_desc": "Mengumpulkan frekuensi defect dalam format tabel QC.",
+
+  "t2_title": "Pareto Diagram",
+  "t2_desc": "Mengidentifikasi defect dominan berdasarkan prinsip 80/20.",
+
+  "t3_title": "Histogram",
+  "t3_desc": "Menganalisis distribusi data numerik untuk kontrol kualitas."
+},
+
+"workflow": {
+  "title": "3 Metode QC Utama",
+  "subtitle": "Dari pencatatan defect hingga analisis pola dan distribusi statistik.",
+  "w1_title": "Check Sheet",
+  "w1_desc": "Mencatat frekuensi defect langsung dari proses produksi.",
+  "w2_title": "Pareto Chart",
+  "w2_desc": "Mengidentifikasi kategori penyebab defect terbesar menggunakan prinsip 80/20.",
+  "w3_title": "Histogram",
+  "w3_desc": "Melihat distribusi data untuk memahami variasi dan perilaku proses."
+},
+
+"lang_name_id": "Indonesia",
+"lang_name_en": "Inggris",
+
+  "toolselector": {
+    "title": "Pilih QC Tools Anda",
+    "desc": "Anda dapat menggunakan satu atau beberapa tools sekaligus.",
+    "cs": "Check Sheet",
+    "pareto": "Pareto Diagram",
+    "hist": "Histogram",
+    "comb": "Gabungkan Laporan QC Tools",
+    "cs_desc": "Hitung frekuensi kategori defect & menghasilkan tabel QC.",
+    "pareto_desc": "Visualisasi kontribusi kategori defect menggunakan prinsip 80/20.",
+    "hist_desc": "Analisis distribusi data numerik dan statistiknya."
+  },
+
+  "checksheet": {
+    "title": "Check Sheet Generator",
+    "input": "Input Kategori Defect",
+    "placeholder": "Nama Kategori",
+    "add": "Tambah",
+    "result": "Hasil Check Sheet",
+    "col_category": "Kategori",
+    "col_count": "Count",
+    "col_inc": "+1",
+    "col_percent": "%",
+    "col_delete": "Delete",
+    "total": "Total data:",
+    "importexport": "Import & Export Data",
+    "upload": "Upload Excel",
+    "exp_pdf": "Export PDF",
+    "exp_excel": "Export Excel",
+    "exp_csv": "Export CSV",
+    "privacy": "Data hanya diproses di browser. Tidak disimpan di server."
+  },
+  "histogram": {
+  "title": "Generator Histogram",
+  "input": "Input Data Numerik",
+  "placeholder": "Masukkan angka dipisah spasi atau koma...",
+  "process": "Proses Data",
+  "bins": "Jumlah Bins",
+  "chart": "Plot Histogram",
+  "stats": "Statistik",
+  "mean": "Rata-rata",
+  "median": "Median"
+},
+
+"sample": {
+  "title": "Data Contoh",
+  "cs": "Contoh Check Sheet",
+  "pareto": "Contoh Pareto",
+  "hist": "Contoh Histogram",
+  "preview": "Lihat Data",
+  "usedata": "Gunakan Data Ini"
+},
+
+"report": {
+  "title": "Pembuat Laporan QC",
+  "select": "Pilih tools yang akan dimasukkan:",
+  "meta": "Metadata Laporan",
+  "project": "Nama Proyek",
+  "company": "Perusahaan / Universitas",
+  "line": "Line Produksi",
+  "date": "Tanggal",
+  "creator": "Dibuat oleh",
+  "generate": "Buat Laporan PDF"
+},
+
+"faq": {
+  "title": "FAQ — Alat QC dalam Manufaktur",
+
+  "q1": "Apa itu Check Sheet?",
+  "a1": "Check Sheet adalah tabel QC sistematis untuk menghitung frekuensi kejadian defect langsung dari proses produksi.",
+
+  "q2": "Apa itu Pareto Diagram?",
+  "a2": "Pareto Diagram membantu mengidentifikasi penyebab kritikal yang menyumbang 80% dari masalah kualitas.",
+
+  "q3": "Apa itu Histogram?",
+  "a3": "Dalam QC manufaktur, Histogram digunakan untuk melihat distribusi data pengukuran seperti dimensi, ketebalan, atau deviasi toleransi.",
+
+  "q4": "Bagaimana cara upload data Excel?",
+  "a4": "Klik 'Upload Excel' dan pilih file yang memiliki kolom kategori dan jumlah defect.",
+
+  "q5": "Apakah data produksi saya disimpan?",
+  "a5": "Tidak. Seluruh pemrosesan dilakukan lokal di browser. Tidak ada data yang dikirim ke server.",
+
+  "q6": "Apakah tools ini gratis digunakan di industri?",
+  "a6": "Ya. QC Tools gratis untuk engineer, industri, mahasiswa, dan penelitian.",
+
+  "q7": "Apakah tools ini bisa dipakai di tablet lantai produksi?",
+  "a7": "Ya. QC Tools responsif dan bisa digunakan di mobile atau terminal touchscreen di area produksi."
+},
+
+"about": {
+  "title": "Tentang QC Tools",
+  "purpose_desc": "QC Tools dibuat untuk menyediakan analisis data kualitas yang akurat dan praktis untuk industri nyata, riset laboratorium, improvement proses, inspeksi produksi, dan edukasi engineering.",
+  "background_desc": "Tools ini mengikuti metodologi QC yang digunakan di pabrik — seperti Six Sigma, SPC, MSA, Lean, dan sistem monitoring berbasis ISO.",
+  "design_desc": "Tampilan dirancang menyerupai lingkungan QC industri — layout bersih, kontras tinggi, struktur fungsional, dan minim distraksi UI.",
+  "credit_desc": "Dikembangkan untuk komunitas kualitas: mahasiswa, pengguna pabrik, engineer, dan profesional industri."
+},
+
+"privacy": {
+  "title": "Pernyataan Privasi & Kebijakan Data",
+  "p1": "QC Tools tidak pernah mengirim data apa pun keluar dari perangkat Anda.",
+  "p2": "Seluruh perhitungan dan proses dilakukan secara lokal di browser.",
+  "p3": "Tidak ada identitas personal atau kredensial yang diminta.",
+  "p4": "Tidak ada tracking atau telemetry tersembunyi.",
+  "p5": "Aman digunakan di lingkungan produksi yang sensitif.",
+  "p6": "Seluruh hasil analisa dianggap sebagai dokumen QC internal."
+},
+
+"nav": {
+  "home": "Beranda",
+  "tools": "QC Tools",
+  "sample": "Data Contoh",
+  "faq": "FAQ",
+  "about": "Tentang",
+  "privacy": "Privasi & Kebijakan"
+},
+
+ "footer": {
+    "description": "QC Tools menyediakan analisis kualitas tingkat industri yang mendukung mahasiswa, profesional, dan lingkungan manufaktur nyata. Digunakan secara global dalam aplikasi kontrol kualitas untuk akurasi, kecepatan, dan keandalan.",
+    "qctools": "QC Tools",
+    "tools": "Tools",
+    "sampledata": "Contoh Data",
+    "faq": "FAQ",
+    "about": "Tentang",
+    "privacy": "Kebijakan Privasi",
+    "support": "Bantuan",
+    "contact": "Hubungi Kami",
+    "terms": "Syarat & Ketentuan",
+    "docs": "Dokumentasi",
+    "api": "Informasi API",
+    "rights": "Seluruh hak cipta dilindungi."
+  },
+
+"highlight": {
+  "scalable_title": "Scalable",
+  "scalable_desc": "Handles growing QC data demands for production expansion, defect monitoring, and measurement throughput.",
+
+  "secure_title": "Secure & Local",
+  "secure_desc": "All processing is done locally in your browser. No cloud upload. No data extraction. Suitable for confidential manufacturing environments.",
+
+  "fast_title": "Fast & Lightweight",
+  "fast_desc": "Instant analytics without lag — optimized for real-time quality checking on the production floor."
+}
+
+
+
+}

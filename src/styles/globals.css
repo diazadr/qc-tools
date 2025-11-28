@@ -1,0 +1,394 @@
+@import "tailwindcss";
+@theme {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-secondary: var(--text-secondary);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  --font-sans: Inter, sans-serif;
+}
+
+
+:root {
+  --bg: #f8fafc; /* Cool Off-White */
+  --card: #ffffff; /* Industrial White */
+  --border: #e2e8f0; /* Neutral Grey */
+  --text: #111827; /* Ink Black */
+  --text-secondary: #6b7280; /* Steel Grey */
+
+  --primary: #194581; /* French Blue */
+  --primary-hover: rgb(18, 34, 85);
+  --success: #22c55e; /* Jade Green */
+  --warning: #f59e0b; /* Amber */
+  --error: #dc2626; /* QC Red */
+}
+
+/* Dark mode variables */
+.dark {
+  --bg: #111827; /* Ink Black */
+  --card: #1e293b; /* Graphite Grey */
+  --border: #253041;
+  --text: #f1f5f9; /* Mist White */
+  --text-secondary: #94a3b8;
+
+  --primary: #194581; /* Soft French Blue */
+  --primary-hover: rgb(18, 34, 85);
+  --success: #39e07d;
+  --warning: #fbbf24;
+  --error: #ef4444;
+}
+
+
+.section-transition {
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    #091c38 100%
+  );
+}
+.section-transition-reverse {
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(
+    to bottom,
+    #091c38 0%,
+    var(--bg) 100%
+  );
+}
+
+
+
+/* hide scrollbar for Chrome, Safari, Edge */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* hide scrollbar for Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* prevent scrollbar flash */
+html, body {
+  overflow: auto;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+.text-legal {
+  font-size: 1rem;
+  line-height: 1.75;
+  letter-spacing: 0.1px;
+}
+
+
+.word-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.word-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 12px;
+  background: white;
+  opacity: 0.9;
+  border-radius: 6px;
+}
+
+
+.expand-img {
+  flex: 1;
+  position: relative;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transition: flex 0.35s ease;
+  cursor: pointer;
+}
+
+.expand-img:hover {
+  flex: 2;
+}
+
+.expand-img:not(:hover) {
+  flex: 0.8;
+}
+
+
+
+/* tambahkan overlay gelap */
+.expand-img::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);   /* transparent normal */
+  transition: background 0.35s ease;
+  z-index: 1;
+}
+
+/* saat hover, overlay gelap */
+.expand-img:hover::before {
+  background: rgba(0,0,0,0.55);
+}
+
+/* teks diletakkan di atas overlay */
+.expand-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+  text-align: center;
+  padding: 10px;
+}
+.diagonal-wrapper {
+  overflow: hidden;
+  clip-path: polygon(28% 0%, 100% 0%, 100% 100%, 16% 100%);
+}
+
+
+.hero-img-diagonal {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: 5% center;
+  transform: scale(1.15);
+}
+
+.hero-img-diagonal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.28); /* tingkat kegelapan */
+  pointer-events: none;
+}
+
+
+
+/* saat hover teks tampil */
+.expand-img:hover .expand-overlay {
+  opacity: 1;
+}
+
+.expand-overlay h2,
+.expand-overlay p {
+  color: #ffffff;      /* 100% putih */
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(0,0,0,0.9); /* makin tajam */
+}
+
+
+.flip-container {
+  perspective: 1500px;
+  width: 100%;
+  height: 300px;
+}
+
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s ease;
+  transform-style: preserve-3d;
+}
+
+.flip-container:hover .flip-inner {
+  transform: rotateY(180deg);
+}
+
+/* FRONT */
+.flip-front,
+.flip-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* FRONT SIDE */
+.flip-front {
+  background-position: center;
+  background-size: cover;
+  filter: brightness(0.8);
+}
+
+.flip-front-text {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+}
+
+/* BACK SIDE */
+.flip-back {
+  transform: rotateY(180deg);
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.qc-dark {
+  background: #091c38;;  /* sama seperti warna footer & navbar */
+  color: white;
+  position: relative;
+  overflow: hidden;
+  padding: 80px 0;
+}
+
+
+/* background image kiri */
+.qc-bg-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.16;
+}
+
+/* background image kanan */
+.qc-bg-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.16;
+}
+
+/* TEXT IMAGE MASK */
+.qc-number-image {
+  font-size: clamp(4rem, 10vw, 9rem);
+  font-weight: 900;
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 0.85;
+  opacity: 0.6;
+  user-select: none;
+}
+
+/* =========================================
+   QC TOOLS — Color System
+   Light Mode (QC Lab theme)
+   Dark Mode (Control Room theme)
+========================================= */
+
+/* Light mode variables */
+
+/* === Apply background & text globally */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
+  font-feature-settings: "tnum", "lnum";
+}
+
+/* Default card style */
+.qc-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Default button style */
+.qc-btn {
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: 0.18s;
+  border: 1px solid transparent;
+  transform: translateY(0);
+}
+
+.qc-btn:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0px 2px 6px rgba(30, 58, 138, 0.3);
+  transform: translateY(-1px);
+}
+
+.qc-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.qc-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  backdrop-filter: blur(4px);
+  transition: 0.2s;
+}
+
+.qc-card:hover {
+  border-color: var(--primary);
+}
+
+table tr:hover {
+  background-color: var(--border);
+}
+.dark table tr:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+input,
+textarea {
+  transition: 0.15s;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.page {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
