@@ -33,8 +33,8 @@ interface DefectLocationSnapshot {
 const CheckSheetDefectLocation = () => {
   const { setSnapshot, getSnapshot } = useChecksheetStore();
 
-  const [circular, setCircular] = useState(["A","B","C","D","E","F","G","H"]);
-  const [radial, setRadial] = useState([1,2,3,4,5,6,7,8,9,10]);
+  // const [circular, setCircular] = useState(["A","B","C","D","E","F","G","H"]);
+  // const [radial, setRadial] = useState([1,2,3,4,5,6,7,8,9,10]);
   const [marks, setMarks] = useState<LocationMark[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
