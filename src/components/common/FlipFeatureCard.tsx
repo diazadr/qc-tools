@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface Props {
   frontImage: string;
   titleFront: string;
@@ -6,11 +8,19 @@ interface Props {
 }
 
 const FlipFeatureCard = ({ frontImage, titleFront, titleBack, descriptionBack }: Props) => {
+  const [flipped, setFlipped] = useState(false);
+
   return (
-    <div className="flip-container">
+    <div
+      className={`flip-container ${flipped ? "active-flip" : ""}`}
+      onClick={() => {
+        if (window.matchMedia("(hover: none)").matches) {
+          setFlipped((prev) => !prev);
+        }
+      }}
+    >
       <div className="flip-inner">
 
-        {/* FRONT */}
         <div
           className="flip-front"
           style={{ backgroundImage: `url(${frontImage})` }}
@@ -20,7 +30,6 @@ const FlipFeatureCard = ({ frontImage, titleFront, titleBack, descriptionBack }:
           </div>
         </div>
 
-        {/* BACK */}
         <div className="flip-back">
           <h3>{titleBack}</h3>
           <p>{descriptionBack}</p>

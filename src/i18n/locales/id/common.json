@@ -30,8 +30,16 @@
   "t2_desc": "Mengidentifikasi defect dominan berdasarkan prinsip 80/20.",
 
   "t3_title": "Histogram",
-  "t3_desc": "Menganalisis distribusi data numerik untuk kontrol kualitas."
+  "t3_desc": "Menganalisis distribusi data numerik untuk kontrol kualitas.",
+  "hero_rot1": "QC Tools berstandar industri",
+"hero_rot2": "Dibuat untuk engineer QC",
+"hero_rot3": "Dipakai di pabrik nyata",
+"hero_rot4": "Cepat — Offline — Gratis"
 },
+
+
+
+
 
 "workflow": {
   "title": "3 Metode QC Utama",

@@ -1,0 +1,65 @@
+.expand-img {
+  flex: 1;
+  position: relative;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transition: flex 0.35s ease;
+  cursor: pointer;
+}
+.expand-img::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  transition: background 0.35s ease;
+  z-index: 1;
+}
+.expand-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+  text-align: center;
+  padding: 6px;
+}
+.expand-title {
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+.expand-desc {
+  font-size: clamp(0.9rem, 3vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.35;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.expand-img.active {
+  flex: 1.7 !important;
+}
+.expand-img.active::before {
+  background: rgba(0,0,0,0.55) !important;
+}
+.expand-img.active .expand-overlay {
+  opacity: 1 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .expand-img:hover {
+    flex: 1.7;
+  }
+  .expand-img:hover::before {
+    background: rgba(0,0,0,0.55);
+  }
+  .expand-img:hover .expand-overlay {
+    opacity: 1;
+  }
+}

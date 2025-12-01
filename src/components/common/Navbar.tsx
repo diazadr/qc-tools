@@ -11,12 +11,9 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
-
-  // swipe handle
   const touchStartX = useRef(0);
   const touchDiff = useRef(0);
 
-  // detect scroll for transparent hero
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener("scroll", handleScroll);
@@ -26,7 +23,6 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
   const isActive = (path: string) => {
     const active = location.pathname === path;
     const inHero = isLandingPage && !scrolled;
-
     return inHero
       ? active
         ? "text-white font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]"
@@ -51,12 +47,10 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
       `}
     >
       <div className="w-full px-6 flex items-center justify-between">
-
-        {/* LOGO */}
         <Link
           to="/"
           className={`
-            text-xl font-extrabold tracking-wide select-none cursor-pointer
+            text-xl font-extrabold tracking-wide select-none cursor-pointer flex items-center gap-2
             ${
               !isLandingPage || scrolled
                 ? "text-primary"
@@ -65,10 +59,10 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
           `}
           onClick={() => setMenuOpen(false)}
         >
+          <img src="/img/icon.png" className="w-6 h-6 object-contain" />
           QC Tools
         </Link>
 
-        {/* DESKTOP MENU */}
         <nav className="hidden md:flex items-center gap-6">
           <Link to="/" className={isActive("/")}>
             {t("nav.home")}
@@ -81,13 +75,11 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
           </Link>
         </nav>
 
-        {/* DESKTOP CONTROLS */}
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle inHero={isLandingPage && !scrolled} />
           <LanguageSwitcher inHero={isLandingPage && !scrolled} />
         </div>
 
-        {/* MOBILE BURGER BUTTON */}
         <button
           className={`
             md:hidden p-2 flex items-center justify-center z-[90] relative rounded-full
@@ -121,21 +113,16 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
         </button>
       </div>
 
-      {/* TAP AREA KIRI YANG BISA KLIK CLOSE */}
       {menuOpen && (
         <div
           className="fixed inset-0 z-40"
           onClick={() => setMenuOpen(false)}
         >
-          {/* visual overlay */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-
-          {/* HANYA area kiri yang ter-tap */}
           <div className="absolute left-0 top-0 w-[30%] h-full" />
         </div>
       )}
 
-      {/* SIDE MENU PANEL */}
       <div
         ref={menuRef}
         className={`

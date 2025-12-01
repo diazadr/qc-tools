@@ -1,0 +1,62 @@
+.section-title {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 3px;
+  width: 0%;
+  background: var(--primary);
+  transition: width 0.32s ease;
+}
+.section-title.is-active::after {
+  width: 100%;
+}
+
+.qc-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  backdrop-filter: blur(4px);
+  transition: 0.2s;
+}
+.qc-card:hover {
+  border-color: var(--primary);
+}
+
+.qc-btn {
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: 0.18s;
+  border: 1px solid transparent;
+  transform: translateY(0);
+}
+.qc-btn:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0px 2px 6px rgba(30, 58, 138, 0.3);
+  transform: translateY(-1px);
+}
+.qc-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.page {
+  animation: fadeIn 0.25s ease;
+}
+
+.text-legal {
+  font-size: 1rem;
+  line-height: 1.75;
+  letter-spacing: 0.1px;
+}

@@ -5,11 +5,19 @@ const Footer = () => {
 
   return (
 <footer className="bg-primary text-white pt-16 pb-10 mt-20 relative overflow-hidden">
+  <img 
+    src="/img/icon.png" 
+    className="absolute left-[-20px] bottom-[-20px] h-60 rotate-50 opacity-[0.18]"
+  />
 
+  <img 
+    src="/img/icon.png" 
+    className="absolute right-[-20px] top-[-20px] h-60 rotate-230 opacity-[0.18]"
+  />
   <div className="relative max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 px-6">
 
     <div>
-      <img src="/logo-white.png" className="h-14 mb-4" />
+      <img src="/img/icon.png" className="h-14 mb-4" />
       <p className="text-sm leading-relaxed text-white/90 max-w-md">
         {t("footer.description")}
       </p>

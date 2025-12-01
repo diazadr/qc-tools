@@ -1,10 +1,11 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Papa from "papaparse";
 import type { ParetoChartHandle } from "../components/charts/ParetoChart";
 import ParetoChart from "../components/charts/ParetoChart";
+import { useChecksheetStore } from "../store/useChecksheetStore";
 
 interface Row {
   category: string;
@@ -19,29 +20,58 @@ interface Row {
 
 const ParetoPage = () => {
   const chartRef = useRef<ParetoChartHandle | null>(null);
+  const store = useChecksheetStore();
 
-  // ===================== STATE =========================
-  const [items, setItems] = useState<any[]>([]);
+  const itemData = useMemo(() => {
+    const snap1 = store.getSnapshot("defective-item");
+    const snap2 = store.getSnapshot("defect-cause");
+    const snap3 = store.getSnapshot("defect-location");
+
+    if (snap1?.data?.categories) {
+      return snap1.data.categories.map((c: any) => ({
+        category: c.name,
+        count: Object.values(c.counts).reduce((s: any, n: any) => s + n, 0),
+      }));
+    }
+
+    if (snap2?.data?.dataset) {
+      const map: Record<string, number> = {};
+      snap2.data.dataset.forEach((entry: any) => {
+        map[entry.type] = (map[entry.type] || 0) + 1;
+      });
+      return Object.entries(map).map(([k, v]) => ({
+        category: k,
+        count: v,
+      }));
+    }
+
+    if (snap3?.data?.marks) {
+      const map: Record<string, number> = {};
+      snap3.data.marks.forEach((m: any) => {
+        map[m.defect] = (map[m.defect] || 0) + m.count;
+      });
+      return Object.entries(map).map(([k, v]) => ({
+        category: k,
+        count: v,
+      }));
+    }
+
+    return [];
+  }, [
+    store.snapshots["defective-item"],
+    store.snapshots["defect-cause"],
+    store.snapshots["defect-location"],
+  ]);
+
+  const [items, setItems] = useState<any[]>(itemData);
   const [category, setCategory] = useState("");
   const [count, setCount] = useState("");
-
   const [operator, setOperator] = useState("");
   const [shift, setShift] = useState("");
   const [line, setLine] = useState("");
 
   const [normalize, setNormalize] = useState(false);
 
-  // Autosave
-  useEffect(() => {
-    localStorage.setItem("pareto_data", JSON.stringify(items));
-  }, [items]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("pareto_data");
-    if (saved) setItems(JSON.parse(saved));
-  }, []);
-
-  // ===================== DATA COMPUTATION =========================
   const totalCount = items.reduce((sum, it) => sum + it.count, 0);
 
   let sorted = [...items].sort((a, b) => b.count - a.count);
@@ -78,15 +108,11 @@ const ParetoPage = () => {
     };
   });
 
-  // ===================== INTERPRETASI =========================
-  const getCriticalCategories = () => {
-    return tableRows
-      .filter(r => r.cumulativePercentage <= 80)
-      .map(r => r.category);
-  };
-  const summary = getCriticalCategories().join(", ");
+  const summary = tableRows
+    .filter(r => r.cumulativePercentage <= 80)
+    .map(r => r.category)
+    .join(", ");
 
-  // ===================== CRUD =========================
   const addItem = () => {
     if (!category.trim()) return;
     const num = Number(count);
@@ -103,7 +129,6 @@ const ParetoPage = () => {
         date: new Date().toLocaleString(),
       },
     ]);
-
     setCategory("");
     setCount("");
   };
@@ -134,10 +159,6 @@ const ParetoPage = () => {
     const updated = items.filter((_, i) => i !== index);
     setItems(updated);
   };
-
-  // =====================================================
-  // EXPORT FUNCTIONS — semua tetap ADA
-  // =====================================================
 
   const exportCSV = () => {
     const csvData = Papa.unparse(
@@ -197,48 +218,38 @@ const ParetoPage = () => {
     autoTable(doc, {
       startY: 20,
       head: [["Kategori", "Jumlah", "%", "Kumulatif%", "Operator", "Shift", "Line", "Tanggal"]],
- body: tableRows.map(r => [
-  r.category || "",
-  r.count || 0,
-  r.percentage + (normalize ? "" : "%") || "",
-  r.cumulativePercentage + "%" || "",
-  r.operator || "",
-  r.shift || "",
-  r.line || "",
-  r.date || "",
-]),
-
-
+      body: tableRows.map(r => [
+        r.category || "",
+        r.count || 0,
+        r.percentage + (normalize ? "" : "%") || "",
+        r.cumulativePercentage + "%" || "",
+        r.operator || "",
+        r.shift || "",
+        r.line || "",
+        r.date || "",
+      ]),
     });
 
     doc.text("Kesimpulan:", 12, doc.lastAutoTable.finalY + 10);
     doc.text(`Kategori utama penyebab defect (>80%):`, 12, doc.lastAutoTable.finalY + 18);
     doc.text(summary || "-", 12, doc.lastAutoTable.finalY + 26);
-
     doc.save("pareto.pdf");
   };
 
-  // ===================== UI =========================
   return (
     <div className="w-full">
+      <h1 className="text-3xl font-bold text-text mb-6">Pareto Chart</h1>
 
-      <h1 className="text-3xl font-bold text-text mb-6">
-        Pareto Chart
-      </h1>
-
-      {/* Normalisasi */}
       <div className="flex items-center mb-4 gap-2">
         <input type="checkbox" checked={normalize} onChange={() => setNormalize(!normalize)} />
         <label className="text-sm text-text">Normalisasi per 1000 unit produksi</label>
       </div>
 
-      {/* Interpretasi */}
       <div className="qc-card mb-6 p-4">
         <p className="text-secondary text-sm">Kategori dominan (≤80%):</p>
         <p className="text-text font-semibold">{summary || "Belum ada data"}</p>
       </div>
 
-      {/* INPUT INFO */}
       <div className="qc-card mb-6">
         <h2 className="text-lg font-semibold text-text mb-4">Informasi Input</h2>
         <div className="flex gap-3 flex-wrap">
@@ -248,33 +259,16 @@ const ParetoPage = () => {
         </div>
       </div>
 
-      {/* INPUT BAR */}
       <div className="qc-card mb-6">
         <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Nama Kategori"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="border border-border bg-card px-3 py-2 rounded w-full"
-          />
-          <input
-            type="number"
-            placeholder="Jumlah"
-            value={count}
-            onChange={(e) => setCount(e.target.value)}
-            className="border border-border bg-card px-3 py-2 rounded w-32"
-          />
-          <button className="qc-btn px-4 py-2" onClick={addItem}>
-            Tambah
-          </button>
+          <input type="text" placeholder="Nama Kategori" value={category} onChange={(e) => setCategory(e.target.value)} className="border border-border bg-card px-3 py-2 rounded w-full" />
+          <input type="number" placeholder="Jumlah" value={count} onChange={(e) => setCount(e.target.value)} className="border border-border bg-card px-3 py-2 rounded w-32" />
+          <button className="qc-btn px-4 py-2" onClick={addItem}>Tambah</button>
         </div>
       </div>
 
-      {/* TABLE */}
       <div className="qc-card mb-6 overflow-x-auto">
         <h2 className="text-lg font-semibold text-text mb-4">Data Pareto</h2>
-
         <table className="text-sm w-full border-collapse">
           <thead>
             <tr className="border-border border-b text-secondary">
@@ -289,43 +283,34 @@ const ParetoPage = () => {
           <tbody>
             {tableRows.map((row, index) => (
               <tr key={index} className="border-border border-b">
-
                 <td className="py-2">{row.category}</td>
-
                 <td className="py-2 text-center">{row.count}</td>
-
                 <td className="py-2 text-center">{row.percentage}{normalize ? "" : "%"}</td>
-
                 <td className="py-2 text-center">{row.cumulativePercentage}%</td>
-
                 <td className="py-2 text-center">
                   <button className="px-2 py-1 qc-btn" onClick={() => decrement(index)}>−1</button>
                   <button className="px-2 py-1 qc-btn ml-1" onClick={() => increment(index)}>+1</button>
                 </td>
-
                 <td className="py-2 text-center">
                   <button className="text-error font-bold" onClick={() => removeItem(index)}>Delete</button>
                   <button className="ml-3 text-secondary" onClick={() => reset(index)}>Reset</button>
                 </td>
-
               </tr>
             ))}
 
             {tableRows.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-4 text-secondary">
-                  Belum ada data
-                </td>
+                <td colSpan={6} className="text-center py-4 text-secondary">Belum ada data</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* CHART */}
       <div className="qc-card mb-6">
-        <h2 className="text-lg font-semibold text-text mb-4">Pareto Chart – Defect Category / Grafik Pareto – Kategori Defect
-</h2>
+        <h2 className="text-lg font-semibold text-text mb-4">
+          Pareto Chart – Defect Category / Grafik Pareto – Kategori Defect
+        </h2>
         <ParetoChart
           ref={chartRef}
           data={sorted}
@@ -335,10 +320,8 @@ const ParetoPage = () => {
         />
       </div>
 
-      {/* EXPORT */}
       <div className="qc-card mb-10">
         <h2 className="text-lg font-semibold text-text mb-4">Export</h2>
-
         <div className="flex flex-wrap gap-3">
           <button className="qc-btn px-4 py-2" onClick={exportPDF}>Export PDF</button>
           <button className="qc-btn px-4 py-2" onClick={exportExcel}>Export Excel</button>
@@ -347,7 +330,6 @@ const ParetoPage = () => {
           <button className="text-error font-bold ml-2" onClick={clearAll}>Hapus semua data</button>
         </div>
       </div>
-
     </div>
   );
 };

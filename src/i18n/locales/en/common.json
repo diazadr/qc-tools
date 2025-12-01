@@ -30,8 +30,16 @@
   "t2_desc": "Identify dominant defect causes using the 80/20 rule.",
 
   "t3_title": "Histogram",
-  "t3_desc": "Visualize numeric data distribution for quality insights."
+  "t3_desc": "Visualize numeric data distribution for quality insights.",
+
+  "hero_rot1": "Industrial-grade QC Tools",
+"hero_rot2": "Made for QC engineers",
+"hero_rot3": "Used in real factories",
+"hero_rot4": "Fast — Offline — Free"
+
 },
+
+
 
 "workflow": {
   "title": "3 Core QC Methods",

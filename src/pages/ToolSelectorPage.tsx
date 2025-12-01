@@ -4,53 +4,31 @@ import ParetoPage from "./ParetoPage";
 import HistogramPage from "./HistogramPage";
 
 const ToolsPage = () => {
-  const [selectedTool, setSelectedTool] = useState("checksheet");
+  const [selectedTool, setSelectedTool] = useState<"checksheet" | "pareto" | "histogram">("checksheet");
 
   return (
-    <div className="w-full pt-24 page flex justify-center">
+    <div className="w-full pt-24 flex justify-center">
+      <div className="w-full max-w-[1400px] px-6 md:px-10">
 
-      <div className="w-full max-w-[1400px] px-10">
-
-        {/* TOOL SELECTOR BUTTONS */}
-        <div className="flex mb-6 border-b border-border">
-
-          <button
-            className={`flex-1 py-3 text-center font-semibold transition ${
-              selectedTool === "checksheet"
-                ? "text-primary border-b-2 border-primary"
-                : "text-secondary hover:text-primary"
-            }`}
+        <div className="flex mb-4 border-b border-border">
+          <ToolTab
+            active={selectedTool === "checksheet"}
+            label="Check Sheet"
             onClick={() => setSelectedTool("checksheet")}
-          >
-            Check Sheet
-          </button>
-
-          <button
-            className={`flex-1 py-3 text-center font-semibold transition ${
-              selectedTool === "pareto"
-                ? "text-primary border-b-2 border-primary"
-                : "text-secondary hover:text-primary"
-            }`}
+          />
+          <ToolTab
+            active={selectedTool === "pareto"}
+            label="Pareto"
             onClick={() => setSelectedTool("pareto")}
-          >
-            Pareto
-          </button>
-
-          <button
-            className={`flex-1 py-3 text-center font-semibold transition ${
-              selectedTool === "histogram"
-                ? "text-primary border-b-2 border-primary"
-                : "text-secondary hover:text-primary"
-            }`}
+          />
+          <ToolTab
+            active={selectedTool === "histogram"}
+            label="Histogram"
             onClick={() => setSelectedTool("histogram")}
-          >
-            Histogram
-          </button>
-
+          />
         </div>
 
-        {/* RENDER CONTENT */}
-        <div className="mt-4">
+        <div className="pt-2">
           {selectedTool === "checksheet" && <CheckSheetPage />}
           {selectedTool === "pareto" && <ParetoPage />}
           {selectedTool === "histogram" && <HistogramPage />}
@@ -62,3 +40,22 @@ const ToolsPage = () => {
 };
 
 export default ToolsPage;
+
+interface ToolTabProps {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}
+
+const ToolTab = ({ active, label, onClick }: ToolTabProps) => (
+  <button
+    onClick={onClick}
+    className={`flex-1 py-2.5 text-sm md:text-base text-center transition border-b-2 ${
+      active
+        ? "border-primary text-primary font-medium"
+        : "border-transparent text-secondary hover:text-primary"
+    }`}
+  >
+    {label}
+  </button>
+);
