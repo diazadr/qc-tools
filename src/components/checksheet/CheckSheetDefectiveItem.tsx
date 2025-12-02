@@ -1,8 +1,18 @@
 import { getColTotal } from "./CheckSheetDefectiveItemLogic";
 import { useDefectiveItemLogic } from "./CheckSheetDefectiveItemLogic";
+import { importExcelChecksheet } from "../../utils/dataio/excel"
+import { importCSVChecksheet } from "../../utils/dataio/csv"
+import { useState, useRef } from "react"
+import { HiChevronDown, HiDocumentArrowUp, HiDocumentArrowDown, HiDocumentText, HiDocumentCheck, HiDocumentDuplicate, HiShare } from "react-icons/hi2"
+
 
 const CheckSheetDefectiveItem = () => {
   const l = useDefectiveItemLogic();
+  const [showImport, setShowImport] = useState(false)
+  const [showExport, setShowExport] = useState(false)
+
+  const importRef = useRef<HTMLDivElement>(null)
+  const exportRef = useRef<HTMLDivElement>(null)
 
   return (
     <div className="text-[14px] space-y-4 select-none">
@@ -10,42 +20,134 @@ const CheckSheetDefectiveItem = () => {
       <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
 
         <div className="font-semibold">Defective Item Check Sheet</div>
-
         <div className="flex items-center gap-2">
+
           <button
             onClick={() => navigator.clipboard.writeText(l.getShareLink())}
-            className="h-[32px] px-4 bg-primary text-white rounded border-[0.5px] cursor-pointer hover:border-primary"
+            className="h-[32px] px-3 flex items-center gap-2 bg-primary text-white rounded border cursor-pointer hover:bg-primary/80"
           >
-            Share Link
+            <HiShare className="w-4 h-4" />
+            <span>Share Link</span>
           </button>
 
 
-          <button
-            onClick={l.doExportPDF}
-            className="h-[32px] px-4 bg-secondary text-white rounded border-[0.5px] cursor-pointer hover:border-primary"
-          >
-            Export PDF
-          </button>
+          <div className="relative" ref={importRef}>
+            <button
+              onClick={() => setShowImport((v: any) => !v)}
+              className="h-[32px] px-3 flex items-center gap-2 bg-muted text-foreground rounded border cursor-pointer hover:border-primary"
+            >
+              <HiDocumentArrowUp className="w-4 h-4" />
+              <span>Import</span>
+              <HiChevronDown
+                className={`w-4 h-4 transition-transform duration-300 ${showImport ? "rotate-180" : ""}`}
+              />
+            </button>
 
-          <button
-            onClick={l.doExportExcel}
-            className="h-[32px] px-4 bg-success text-white rounded border-[0.5px] cursor-pointer hover:border-primary"
-          >
-            Export Excel
-          </button>
+            {showImport && (
+              <div className="absolute right-0 mt-1 w-[160px] bg-card border border-border rounded shadow text-sm z-50">
 
-          <button
-            onClick={l.doExportCSV}
-            className="h-[32px] px-4 bg-muted text-foreground rounded border-[0.5px] cursor-pointer hover:border-primary"
-          >
-            Export CSV
-          </button>
+                <label
+                  htmlFor="importExcel"
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentCheck className="w-4 h-4" />
+                  Excel (.xlsx)
+                </label>
+                <input
+                  id="importExcel"
+                  type="file"
+                  accept=".xlsx"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    importExcelChecksheet(file, (d) => {
+                      l.setDays(d.days)
+                      l.setCategories(d.categories)
+                      l.setCustomFields(d.customFields)
+                      l.setMetadata(d.metadata)
+                    })
+                    setShowImport(false)
+                  }}
+                />
+
+                <label
+                  htmlFor="importCSV"
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentDuplicate className="w-4 h-4" />
+                  CSV (.csv)
+                </label>
+                <input
+                  id="importCSV"
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    importCSVChecksheet(file, (d) => {
+                      l.setDays(d.days)
+                      l.setCategories(d.categories)
+                      l.setCustomFields(d.customFields)
+                      l.setMetadata(d.metadata)
+                    })
+                    setShowImport(false)
+                  }}
+                />
+
+              </div>
+            )}
+          </div>
+
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setShowExport((v: any) => !v)}
+              className="h-[32px] px-3 flex items-center gap-2 bg-muted text-foreground rounded border cursor-pointer hover:border-primary"
+            >
+              <HiDocumentArrowDown className="w-4 h-4" />
+              <span>Export</span>
+              <HiChevronDown
+                className={`w-4 h-4 transition-transform duration-300 ${showExport ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {showExport && (
+              <div className="absolute right-0 mt-1 w-[160px] bg-card border border-border rounded shadow text-sm z-50">
+
+                <div
+                  onClick={() => { l.doExportPDF(); setShowExport(false); }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentText className="w-4 h-4" />
+                  PDF
+                </div>
+
+                <div
+                  onClick={() => { l.doExportExcel(); setShowExport(false); }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentCheck className="w-4 h-4" />
+                  Excel
+                </div>
+
+                <div
+                  onClick={() => { l.doExportCSV(); setShowExport(false); }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentDuplicate className="w-4 h-4" />
+                  CSV
+                </div>
+
+              </div>
+            )}
+          </div>
 
           <button
             onClick={() => l.setIsLocked(!l.isLocked)}
-            className={`flex items-center gap-1 px-3 py-1 rounded text-sm border-[0.5px] cursor-pointer ${l.isLocked
-                ? "bg-error/20 text-error border-error hover:border-error"
-                : "bg-success/20 text-success border-success hover:border-success"
+            className={`flex items-center gap-1 px-3 py-1 rounded text-sm border cursor-pointer ${l.isLocked
+              ? "bg-error/20 text-error border-error hover:border-error"
+              : "bg-success/20 text-success border-success hover:border-success"
               }`}
           >
             <span>{l.isLocked ? "🔒" : "🔓"}</span>
@@ -53,6 +155,8 @@ const CheckSheetDefectiveItem = () => {
           </button>
 
         </div>
+
+
 
       </div>
 
@@ -263,6 +367,10 @@ const CheckSheetDefectiveItem = () => {
               <tr>
 
                 {/* SORT NAME */}
+                <th className="px-2 py-2 text-center border border-border w-[40px]">
+                  No
+                </th>
+
                 <th
                   className="px-3 py-3 text-left border border-border cursor-pointer select-none hover:bg-primary/10"
                   onClick={() => l.setSort("name")}
@@ -316,66 +424,87 @@ const CheckSheetDefectiveItem = () => {
                     )}
                   </span>
                 </th>
+
+                <th className="px-3 py-2 text-center font-mono border border-border">
+                  Cum %
+                </th>
+
               </tr>
             </thead>
 
             <tbody>
-              {l.sortedCategories.map((c, rowIndex) => {
-                const total = l.getRowTotal(c)
-                const pct = l.allTotal > 0 ? (total / l.allTotal) * 100 : 0
+              {(() => {
+                let running = 0
+                return l.sortedCategories.map((c, rowIndex) => {
+                  const total = l.getRowTotal(c)
+                  const pct = l.allTotal > 0 ? (total / l.allTotal) * 100 : 0
+                  running += pct
 
-                return (
-                  <tr
-                    key={c.id}
-                    className="hover:bg-primary/5 transition-colors select-none"
-                  >
-                    <td className="px-3 py-2 text-sm border border-border">
-                      {c.name}
-                    </td>
-
-                    {l.days.map((day, colIndex) => (
-                      <td
-                        key={day}
-                        ref={el => {
-                          if (!l.cellRefs.current[rowIndex]) l.cellRefs.current[rowIndex] = []
-                          l.cellRefs.current[rowIndex][colIndex] = el
-                        }}
-                        tabIndex={0}
-                        onFocus={() => {
-                          l.setSelectedCat(c.id)
-                          l.setSelectedDay(day)
-                          l.setCellBuffer("")
-                        }}
-                        onKeyDown={e => l.handleCellKeyDown(e, rowIndex, colIndex)}
-                        onClick={() => {
-                          l.setSelectedCat(c.id)
-                          l.setSelectedDay(day)
-                        }}
-                        className={`text-center font-mono border border-border px-3 py-2 cursor-pointer transition-colors
-                ${l.selectedCat === c.id && l.selectedDay === day
-                            ? "bg-primary/20 border-primary text-primary font-bold"
-                            : "hover:bg-primary/10 hover:text-primary hover:border-primary"
-                          }
-              `}
-                      >
-                        {c.counts[day]}
+                  return (
+                    <tr key={c.id} className="hover:bg-primary/5 transition-colors select-none">
+                      <td className="px-2 py-2 text-center border border-border text-xs">
+                        {rowIndex + 1}
                       </td>
-                    ))}
+                      <td className="px-3 py-2 text-sm border border-border">
+                        {c.name}
+                      </td>
+{l.days.map((day) => (
+  <td
+    key={day}
+    tabIndex={0}
+    contentEditable={!l.isLocked && l.selectedCat === c.id && l.selectedDay === day}
+    suppressContentEditableWarning={true}
+    onFocus={() => {
+      l.setSelectedCat(c.id)
+      l.setSelectedDay(day)
+      l.setManualInput(c.counts[day])
+    }}
+    onClick={() => {
+      l.setSelectedCat(c.id)
+      l.setSelectedDay(day)
+    }}
+    onInput={e => {
+      const v = Number(e.currentTarget.innerText)
+      if (!isNaN(v)) l.setManualInput(v)
+    }}
+    onBlur={() => l.applyManualInput()}
+    className={`text-center font-mono border border-border px-3 py-2 focus:outline-none transition-colors
+      ${l.selectedCat === c.id && l.selectedDay === day
+        ? "cursor-text bg-primary/20 text-primary font-bold"
+        : "cursor-pointer hover:bg-primary/10 hover:text-primary"
+      }
+    `}
+  >
+    {c.counts[day]}
+  </td>
+))}
 
-                    <td className="text-center font-bold font-mono border border-border px-3 py-2">
-                      {total}
-                    </td>
 
-                    <td className="text-center font-mono border border-border px-3 py-2">
-                      {pct.toFixed(1)}%
-                    </td>
-                  </tr>
-                )
-              })}
+
+                      <td className="text-center font-bold font-mono border border-border px-3 py-2">
+                        {total}
+                      </td>
+
+                      <td className="text-center font-mono border border-border px-3 py-2">
+                        {pct.toFixed(1)}%
+                      </td>
+
+                      <td className="text-center font-mono border border-border px-3 py-2">
+                        {running.toFixed(1)}%
+                      </td>
+                    </tr>
+                  )
+                })
+              })()}
             </tbody>
+
 
             <tfoot className="bg-bg font-semibold border-t border-border">
               <tr>
+                <td className="px-3 py-2 text-center border border-border text-secondary">
+
+                </td>
+
                 <td className="px-3 py-2 text-center border border-border">TOTAL</td>
                 {l.days.map(day => (
                   <td key={day} className="px-3 py-2 text-center font-mono border border-border">
@@ -384,13 +513,99 @@ const CheckSheetDefectiveItem = () => {
                 ))}
                 <td className="px-3 py-2 text-center font-bold font-mono border border-border">{l.allTotal}</td>
                 <td className="px-3 py-2 text-center text-secondary border border-border">100%</td>
+                <td className="px-3 py-2 text-center text-secondary border border-border">100%</td>
               </tr>
             </tfoot>
+
           </table>
 
 
         </div>
       </div>
+<div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+  <div className="font-semibold flex items-center gap-2">
+    Keterangan Tabel
+  </div>
+
+  <table className="w-full text-sm border border-border rounded overflow-hidden">
+    <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
+
+      <tr className="border-b border-border">
+        <td className="px-2 py-1 w-[140px] flex items-center gap-2">
+          🔢 <b>No</b>
+        </td>
+        <td className="px-2 py-1">Urutan ranking defect berdasarkan total kejadian</td>
+      </tr>
+
+      <tr className="border-b border-border">
+        <td className="px-2 py-1 flex items-center gap-2">
+          🏷️ <b>Jenis Defect</b>
+        </td>
+        <td className="px-2 py-1">Nama kategori defect yang diamati</td>
+      </tr>
+
+      <tr className="border-b border-border">
+        <td className="px-2 py-1 flex items-center gap-2">
+          📆 <b>Kolom Hari</b>
+        </td>
+        <td className="px-2 py-1">Frekuensi defect per hari atau shift</td>
+      </tr>
+
+      <tr className="border-b border-border">
+        <td className="px-2 py-1 flex items-center gap-2">
+          ➕ <b>Total</b>
+        </td>
+        <td className="px-2 py-1">Jumlah keseluruhan defect pada kategori tersebut</td>
+      </tr>
+
+      <tr className="border-b border-border">
+        <td className="px-2 py-1 flex items-center gap-2">
+          📊 <b>%</b>
+        </td>
+        <td className="px-2 py-1">Persentase defect terhadap total keseluruhan</td>
+      </tr>
+
+      <tr className="border-b border-border">
+        <td className="px-2 py-1 flex items-center gap-2">
+          🔴 <b>Cum %</b>
+        </td>
+        <td className="px-2 py-1">Persentase kumulatif untuk analisis Pareto</td>
+      </tr>
+
+      <tr>
+        <td className="px-2 py-1 flex items-center gap-2">
+          🟦 <b>Cell biru</b>
+        </td>
+        <td className="px-2 py-1">Menandakan sel yang sedang dipilih / difokuskan</td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+
+      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+        <div className="font-semibold flex items-center gap-2">
+          Tahapan Selanjutnya
+        </div>
+
+        <div className="flex items-center gap-2 text-sm">
+          <span>📊</span>
+          <span>Gunakan Pareto untuk melihat dominasi defect sampai cumulative 80%.</span>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm">
+          <span>📈</span>
+          <span>Gunakan histogram jika ingin melihat pola distribusi defect antar hari/shift.</span>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm">
+          <span>🔍</span>
+          <span>Jadikan hasil visual ini sebagai dasar analisa akar penyebab berikutnya.</span>
+        </div>
+      </div>
+
 
       <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
 

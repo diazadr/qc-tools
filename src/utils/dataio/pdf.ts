@@ -67,5 +67,86 @@ export function exportPDF(data: QCData, filename: string) {
     })
   }
 
+  if (data.type === "DISTRIBUTION") {
+  doc.setFontSize(10)
+  let y = 22
+
+  for (const k of data.customFields) {
+    doc.text(`${k}: ${data.metadata[k] || "-"}`, 14, y)
+    y += 6
+  }
+  doc.text(`Date: ${data.metadata.date || "-"}`, 14, y)
+  y += 10
+
+  const body = data.rows.map(r => [
+    r.deviation,
+    (data.target + r.deviation * data.binSize).toFixed(6),
+    r.count,
+    data.unit
+  ])
+
+  autoTable(doc, {
+    head: [["Deviation", "Actual", "Count", "Unit"]],
+    body,
+    startY: y
+  })
+
+  doc.save(filename.endsWith(".pdf") ? filename : filename + ".pdf")
+}
+
+if (data.type === "DEFECT_LOCATION") {
+  doc.setFontSize(10)
+
+  let y = 22
+  for (const k of data.customFields) {
+    doc.text(`${k}: ${data.metadata[k] || "-"}`, 14, y)
+    y += 6
+  }
+  doc.text(`Total: ${data.totalAll ?? "-"}`, 14, y)
+  y += 10
+
+  const head = ["Circ","Rad","Count","Defect","Severity","Comment","Time"]
+
+  const rows = data.mapping.map(m => [
+    m.circ,
+    m.rad,
+    m.count,
+    m.defect,
+    m.severity,
+    m.comment,
+    new Date(m.timestamp).toLocaleString(),
+  ])
+
+  autoTable(doc, {
+    head: [head],
+    body: rows,
+    startY: y
+  })
+
+  doc.save(filename.endsWith(".pdf") ? filename : filename + ".pdf")
+}
+
+if (data.type === "DEFECT_CAUSE") {
+  doc.setFontSize(10)
+
+  let y = 22
+  for (const k of data.customFields) {
+    doc.text(`${k}: ${data.metadata[k] || "-"}`, 14, y)
+    y += 6
+  }
+  doc.text(`Total: ${data.totalAll ?? "-"}`, 14, y)
+  y += 10
+    
+  autoTable(doc, {
+    head: [["Worker","Day","Shift","Defect"]],
+    body: data.dataset.map(e => [e.worker,e.day,e.shift,e.type]),
+    startY: y
+  })
+
+  doc.save(filename.endsWith(".pdf") ? filename : filename + ".pdf")
+  return
+}
+
+
   doc.save(filename.endsWith(".pdf") ? filename : filename + ".pdf")
 }

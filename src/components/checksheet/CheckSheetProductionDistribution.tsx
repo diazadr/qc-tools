@@ -1,438 +1,487 @@
-import { useEffect, useState } from "react";
-import { useChecksheetStore } from "../../store/useChecksheetStore";
+import { useDistributionLogic } from "./CheckSheetProductionDistributionLogic"
+import { importExcelChecksheet } from "../../utils/dataio/excel"
+import { importCSVChecksheet } from "../../utils/dataio/csv"
+import { useEffect, useRef, useState } from "react"
+import {
+  HiChevronDown,
+  HiDocumentArrowUp,
+  HiDocumentArrowDown,
+  HiDocumentText,
+  HiDocumentCheck,
+  HiDocumentDuplicate,
+  HiShare
+} from "react-icons/hi2"
 
-interface DevRow {
-  deviation: number;
-  count: number;
-}
-
-interface SnapshotDistribution {
-  target: number;
-  LSL: number;
-  USL: number;
-  binSize: number;
-  unit: string;
-
-  date: string;
-  shift: string;
-  line: string;
-  operator: string;
-  product: string;
-  characteristic: string;
-  note: string;
-
-  rows: DevRow[];
-  locked: boolean;
-}
-
-const CheckSheetProductionDistribution = () => {
-  const store = useChecksheetStore();
-
-  const [target, setTarget] = useState<number>(8.3);
-  const [LSL, setLSL] = useState<number>(-8);
-  const [USL, setUSL] = useState<number>(8);
-  const [binSize, setBinSize] = useState<number>(0.001);
-  const [unit, setUnit] = useState<string>("mm");
-
-  const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [shift, setShift] = useState<string>("");
-  const [line, setLine] = useState<string>("");
-  const [operator, setOperator] = useState<string>("");
-  const [product, setProduct] = useState<string>("");
-  const [characteristic, setCharacteristic] = useState<string>("");
-  const [note, setNote] = useState<string>("");
-
-  const [rows, setRows] = useState<DevRow[]>(
-    Array.from({ length: 21 }, (_, i) => ({
-      deviation: i - 10,
-      count: 0
-    }))
-  );
-
-  const [selectedDev, setSelectedDev] = useState<number | null>(null);
-  const [manualInput, setManualInput] = useState<number>(0);
-  const [locked, setLocked] = useState<boolean>(false);
-
-  const saveSnapshot = () => {
-    const data: SnapshotDistribution = {
-      target,
-      LSL,
-      USL,
-      binSize,
-      unit,
-      date,
-      shift,
-      line,
-      operator,
-      product,
-      characteristic,
-      note,
-      rows,
-      locked
-    };
-    store.setSnapshot("distribution", data);
-  };
+const CheckSheetDistribution = () => {
+  const l = useDistributionLogic()
+  const [showImport, setShowImport] = useState(false)
+  const [showExport, setShowExport] = useState(false)
+  const importRef = useRef<HTMLDivElement>(null)
+  const exportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const snap = store.getSnapshot("distribution");
-    if (!snap) return;
-    const data = snap.data as SnapshotDistribution;
-
-    setTarget(data.target);
-    setLSL(data.LSL);
-    setUSL(data.USL);
-    setBinSize(data.binSize);
-    setUnit(data.unit);
-
-    setDate(data.date);
-    setShift(data.shift);
-    setLine(data.line);
-    setOperator(data.operator);
-    setProduct(data.product);
-    setCharacteristic(data.characteristic);
-    setNote(data.note);
-
-    setRows(data.rows);
-    setLocked(data.locked);
-  }, []);
-
-  const increment = () => {
-    if (selectedDev === null || locked) return;
-    setRows(prev => {
-      const updated = prev.map(r =>
-        r.deviation === selectedDev ? { ...r, count: r.count + 1 } : r
-      );
-      return updated;
-    });
-    saveSnapshot();
-  };
-
-  const decrement = () => {
-    if (selectedDev === null || locked) return;
-    setRows(prev => {
-      const updated = prev.map(r =>
-        r.deviation === selectedDev && r.count > 0 ? { ...r, count: r.count - 1 } : r
-      );
-      return updated;
-    });
-    saveSnapshot();
-  };
-
-  const applyManualInput = () => {
-    if (selectedDev === null || locked) return;
-    if (manualInput < 0) return;
-    setRows(prev => {
-      const updated = prev.map(r =>
-        r.deviation === selectedDev ? { ...r, count: manualInput } : r
-      );
-      return updated;
-    });
-    setManualInput(0);
-    saveSnapshot();
-  };
-
-  const clearSelected = () => {
-    if (selectedDev === null || locked) return;
-    setRows(prev => {
-      const updated = prev.map(r =>
-        r.deviation === selectedDev ? { ...r, count: 0 } : r
-      );
-      return updated;
-    });
-    saveSnapshot();
-  };
-
-  const clearAll = () => {
-    if (locked) return;
-    setRows(prev => prev.map(r => ({ ...r, count: 0 })));
-    setSelectedDev(null);
-    setManualInput(0);
-    saveSnapshot();
-  };
-
-  // const toggleLock = () => {
-  //   setLocked(prev => !prev);
-  //   saveSnapshot();
-  // };
-
-  const totalCount = rows.reduce((s, r) => s + r.count, 0);
-  const maxCount = Math.max(...rows.map(r => r.count), 1);
-
-  const values = rows.flatMap(r => {
-    if (r.count <= 0) return [];
-    const actual = target + r.deviation * binSize;
-    return Array.from({ length: r.count }, () => actual);
-  });
-
-  let meanActual = 0;
-  let meanDeviation = 0;
-  let stdDev = 0;
-  let minActual = 0;
-  let maxActual = 0;
-
-  if (values.length > 0) {
-    const n = values.length;
-    const sum = values.reduce((s, v) => s + v, 0);
-    meanActual = sum / n;
-    meanDeviation = meanActual - target;
-    minActual = Math.min(...values);
-    maxActual = Math.max(...values);
-    if (n > 1) {
-      const varSum = values.reduce((s, v) => s + (v - meanActual) * (v - meanActual), 0);
-      stdDev = Math.sqrt(varSum / (n - 1));
+    const handleClickOutside = (e: MouseEvent) => {
+      if (importRef.current && !importRef.current.contains(e.target as Node)) setShowImport(false)
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) setShowExport(false)
     }
-  }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
-  const LSLActual = target + LSL * binSize;
-  const USLActual = target + USL * binSize;
+  const totalCount = l.rows.reduce((s, r) => s + r.count, 0)
+  const maxCount = Math.max(...l.rows.map(r => r.count), 1)
 
-  let inSpec = 0;
-  let outSpec = 0;
-  rows.forEach(r => {
-    const actual = target + r.deviation * binSize;
-    if (r.count <= 0) return;
-    if (actual < LSLActual || actual > USLActual) outSpec += r.count;
-    else inSpec += r.count;
-  });
+  const LSLActual = l.target + l.LSL * l.binSize
+  const USLActual = l.target + l.USL * l.binSize
 
-  const outSpecPercent = totalCount > 0 ? (outSpec / totalCount) * 100 : 0;
-
-  let Cp = 0;
-  let Cpk = 0;
-  if (stdDev > 0 && totalCount > 1) {
-    Cp = (USLActual - LSLActual) / (6 * stdDev);
-    const Cpu = (USLActual - meanActual) / (3 * stdDev);
-    const Cpl = (meanActual - LSLActual) / (3 * stdDev);
-    Cpk = Math.min(Cpu, Cpl);
-  }
-
-  const exportCSV = () => {
-    const header = ["Deviation", "ActualValue", "Count", "Unit"];
-    const lines = rows.map(r => {
-      const actual = target + r.deviation * binSize;
-      return [r.deviation.toString(), actual.toFixed(6), r.count.toString(), unit].join(",");
-    });
-    const all = [header.join(","), ...lines].join("\n");
-    const blob = new Blob([all], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "production_distribution_checksheet.csv";
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  let inSpec = 0
+  let outSpec = 0
+  l.rows.forEach(r => {
+    const actual = l.target + r.deviation * l.binSize
+    if (r.count <= 0) return
+    if (actual < LSLActual || actual > USLActual) outSpec += r.count
+    else inSpec += r.count
+  })
 
   return (
     <div className="text-[14px] space-y-4 select-none">
 
-      <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm cursor-default">
-        <div className="font-semibold">Production Process Distribution Check Sheet</div>
-        <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm cursor-default ${locked ? "bg-error/15 text-error" : "bg-success/15 text-success"}`}>
-          <span>{locked ? "🔒" : "🔓"}</span>
-          <span>{locked ? "Locked" : "Unlocked"}</span>
+      <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
+        <div className="font-semibold">Distribution Check Sheet</div>
+        <div className="flex items-center gap-2">
+
+          <button
+            onClick={() => navigator.clipboard.writeText(l.getShareLink())}
+            className="h-[32px] px-3 flex items-center gap-2 bg-primary text-white rounded border cursor-pointer hover:bg-primary/80"
+          >
+            <HiShare className="w-4 h-4" />
+            <span>Share Link</span>
+          </button>
+
+          <div className="relative" ref={importRef}>
+            <button
+              onClick={() => setShowImport(v => !v)}
+              className="h-[32px] px-3 flex items-center gap-2 bg-muted text-foreground rounded border cursor-pointer hover:border-primary"
+            >
+              <HiDocumentArrowUp className="w-4 h-4" />
+              <span>Import</span>
+              <HiChevronDown className={`w-4 h-4 transition-transform duration-300 ${showImport ? "rotate-180" : ""}`} />
+            </button>
+
+            {showImport && (
+              <div className="absolute right-0 mt-1 w-[160px] bg-card border border-border rounded shadow text-sm z-50">
+
+                <label htmlFor="importExcelDist"
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20">
+                  <HiDocumentCheck className="w-4 h-4" /> Excel (.xlsx)
+                </label>
+                <input
+                  id="importExcelDist"
+                  type="file"
+                  accept=".xlsx"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    importExcelChecksheet(file, (d) => {
+                      l.setRows(d.rows)
+                    })
+                    setShowImport(false)
+                  }}
+                />
+
+                <label htmlFor="importCSVDist"
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20">
+                  <HiDocumentDuplicate className="w-4 h-4" /> CSV (.csv)
+                </label>
+
+                <input
+                  id="importCSVDist"
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    importCSVChecksheet(file, (d) => {
+                      l.setRows(d.rows)
+                    })
+                    setShowImport(false)
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setShowExport(v => !v)}
+              className="h-[32px] px-3 flex items-center gap-2 bg-muted text-foreground rounded border cursor-pointer hover:border-primary"
+            >
+              <HiDocumentArrowDown className="w-4 h-4" />
+              <span>Export</span>
+              <HiChevronDown className={`w-4 h-4 transition-transform duration-300 ${showExport ? "rotate-180" : ""}`} />
+            </button>
+
+            {showExport && (
+              <div className="absolute right-0 mt-1 w-[160px] bg-card border border-border rounded shadow text-sm z-50">
+                <div
+                  onClick={() => { l.doExportPDF(); setShowExport(false) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20">
+                  <HiDocumentText className="w-4 h-4" /> PDF
+                </div>
+
+                <div
+                  onClick={() => { l.doExportExcel(); setShowExport(false) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20">
+                  <HiDocumentCheck className="w-4 h-4" /> Excel
+                </div>
+
+                <div
+                  onClick={() => { l.doExportCSV(); setShowExport(false) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20">
+                  <HiDocumentDuplicate className="w-4 h-4" /> CSV
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => l.setLocked(!l.locked)}
+            className={`flex items-center gap-1 px-3 py-1 rounded text-sm border cursor-pointer ${l.locked
+              ? "bg-error/20 text-error border-error hover:border-error"
+              : "bg-success/20 text-success border-success hover:border-success"
+              }`}
+          >
+            <span>{l.locked ? "🔒" : "🔓"}</span>
+            <span>{l.locked ? "Locked" : "Unlocked"}</span>
+          </button>
+
         </div>
       </div>
 
-      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3 cursor-default">
-        <div className="font-medium text-sm">Informasi Produksi</div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <input type="date" disabled={locked} value={date} onChange={e => setDate(e.target.value)}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-full ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-          />
-          <input disabled={locked} value={shift} onChange={e => setShift(e.target.value)}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-full ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            placeholder="Shift"
-          />
-          <input disabled={locked} value={line} onChange={e => setLine(e.target.value)}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-full ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            placeholder="Line"
-          />
-          <input disabled={locked} value={operator} onChange={e => setOperator(e.target.value)}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-full ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            placeholder="Operator"
-          />
+        <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+
+          <div className="font-medium text-sm">Informasi Produksi</div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {l.customFields.map(f => (
+              <div key={f} className="flex items-center gap-1">
+                <input
+                  disabled={l.locked}
+                  className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 w-full ${l.locked
+                    ? "cursor-not-allowed"
+                    : "cursor-text hover:border-primary"
+                    }`}
+                  value={l.metadata[f] || ""}
+                  placeholder={f}
+                  onChange={e => l.setMetadata({ ...l.metadata, [f]: e.target.value })}
+                />
+                {!l.locked && f !== "date" && (
+                  <button
+                    onClick={() => l.removeField(f)}
+                    className="text-red-500 text-xs hover:border-red-500 border-[0.5px] rounded px-[4px] cursor-pointer"
+                  >X</button>
+                )}
+              </div>
+            ))}
+
+            <div className="relative w-full">
+              <input
+                disabled={l.locked}
+                type="date"
+                className={`h-[32px] bg-bg text-foreground border-[0.5px] border-border rounded px-2 w-full 
+                  appearance-none focus:outline-none focus:outline-[2px] focus:outline-primary
+                  ${l.locked ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary"}
+                `}
+                value={l.metadata.date}
+                onChange={e => l.setMetadata({ ...l.metadata, date: e.target.value })}
+              />
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-secondary">
+                📅
+              </span>
+            </div>
+
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              disabled={l.locked}
+              className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 flex-1`}
+              placeholder="Field Baru ..."
+              value={l.newField}
+              onChange={e => l.setNewField(e.target.value)}
+            />
+
+            <button
+              disabled={l.locked}
+              onClick={l.addField}
+              className={`h-[32px] px-3 bg-muted text-foreground rounded border-[0.5px] ${l.locked
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer hover:border-primary"
+                }`}
+            >
+              +
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <input disabled={locked} value={product} onChange={e => setProduct(e.target.value)}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-full ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            placeholder="Product"
-          />
-          <input disabled={locked} value={characteristic} onChange={e => setCharacteristic(e.target.value)}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-full ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            placeholder="Characteristic"
-          />
-          <input disabled={locked} value={unit} onChange={e => setUnit(e.target.value)}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-full ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            placeholder="Unit"
-          />
-          <input disabled={locked} type="number" step="0.0001" value={binSize} onChange={e => setBinSize(Number(e.target.value))}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-full font-mono ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            placeholder="Bin Size"
-          />
+        <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+          <div className="font-medium text-sm">Parameter</div>
+
+          <div className="grid grid-cols-3 gap-2">
+
+            <div className="flex flex-col text-xs">
+              <span>Target</span>
+              <input
+                disabled={l.locked}
+                type="number"
+                className="h-[32px] bg-bg border border-border rounded px-2 font-mono"
+                value={l.target}
+                onChange={e => l.setTarget(Number(e.target.value))}
+              />
+            </div>
+
+            <div className="flex flex-col text-xs">
+              <span>LSL</span>
+              <input
+                disabled={l.locked}
+                type="number"
+                className="h-[32px] bg-bg border border-border rounded px-2 font-mono"
+                value={l.LSL}
+                onChange={e => l.setLSL(Number(e.target.value))}
+              />
+            </div>
+
+            <div className="flex flex-col text-xs">
+              <span>USL</span>
+              <input
+                disabled={l.locked}
+                type="number"
+                className="h-[32px] bg-bg border border-border rounded px-2 font-mono"
+                value={l.USL}
+                onChange={e => l.setUSL(Number(e.target.value))}
+              />
+            </div>
+
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+
+            <div className="flex flex-col text-xs">
+              <span>Unit</span>
+              <input
+                disabled={l.locked}
+                className="h-[32px] bg-bg border border-border rounded px-2 font-mono"
+                value={l.unit}
+                onChange={e => l.setUnit(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col text-xs">
+              <span>Bin Size</span>
+              <input
+                disabled={l.locked}
+                type="number"
+                step="0.0001"
+                className="h-[32px] bg-bg border border-border rounded px-2 font-mono"
+                value={l.binSize}
+                onChange={e => l.setBinSize(Number(e.target.value))}
+              />
+            </div>
+
+          </div>
+
         </div>
       </div>
 
-      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-2 cursor-default">
-
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-1">
-            <div className="font-medium text-sm">Target</div>
-            <input type="number" disabled={locked} value={target} onChange={e => setTarget(Number(e.target.value))}
-              className={`h-[32px] bg-bg border border-border rounded px-2 w-[120px] font-mono ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            />
-          </div>
-          <div className="space-y-1">
-            <div className="font-medium text-sm">LSL</div>
-            <input type="number" disabled={locked} value={LSL} onChange={e => setLSL(Number(e.target.value))}
-              className={`h-[32px] bg-bg border border-border rounded px-2 w-[120px] font-mono ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            />
-          </div>
-          <div className="space-y-1">
-            <div className="font-medium text-sm">USL</div>
-            <input type="number" disabled={locked} value={USL} onChange={e => setUSL(Number(e.target.value))}
-              className={`h-[32px] bg-bg border border-border rounded px-2 w-[120px] font-mono ${locked ? "cursor-not-allowed" : "cursor-text"}`}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-2 cursor-default">
-        <div className="overflow-auto max-h-[380px] no-scrollbar">
+      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+        <div className="overflow-auto max-h-[380px]">
           <table className="w-full border border-border text-xs">
-            <thead className="bg-bg text-secondary sticky top-0 cursor-default">
+            <thead className="bg-card text-secondary sticky top-0">
               <tr>
-                <th className="border border-border px-2 py-2 text-left cursor-default">Deviation</th>
-                <th className="border border-border px-2 py-1 text-left font-mono cursor-default">Actual ({unit})</th>
-                <th className="border border-border px-2 py-1 text-center cursor-default">Count</th>
-                <th className="border border-border px-2 py-1 text-left cursor-default">Distribution</th>
-                <th className="border border-border px-2 py-1 text-center cursor-default">Freq</th>
+                <th className="px-2 py-2 border border-border text-left">Deviation</th>
+                <th className="px-2 py-2 border border-border text-left">Actual ({l.unit})</th>
+                <th className="px-2 py-2 border border-border text-center">Count</th>
+                <th className="px-2 py-2 border border-border text-left">Distribution</th>
+                <th className="px-2 py-2 border border-border text-center">Freq</th>
               </tr>
             </thead>
 
             <tbody>
-              {rows.map(r => {
-                const actual = target + r.deviation * binSize;
-                const outSpec = actual < LSLActual || actual > USLActual;
+              {l.rows.map((r, rowIndex) => {
+                const actual = l.target + r.deviation * l.binSize
+                const out = actual < LSLActual || actual > USLActual
                 return (
                   <tr
                     key={r.deviation}
-                    className={`border border-border cursor-pointer ${selectedDev === r.deviation ? "bg-primary/10" : "hover:bg-primary/10"
-                      }`}
-                    onClick={() => {
-                      if (locked) return;
-                      setSelectedDev(r.deviation);
-                    }}
+                    className={`cursor-pointer ${l.selectedDev === rowIndex ? "bg-primary/20" : "hover:bg-primary/10"}`}
+                    onClick={() => !l.locked && l.setSelectedDev(rowIndex)}
+
                   >
-                    <td className={`border border-border px-2 font-mono ${outSpec ? "text-error" : ""}`}>
+                    <td className={`px-2 py-1 border border-border font-mono ${out ? "text-error" : ""}`}>
                       {r.deviation}
                     </td>
-                    <td className="border border-border px-2 font-mono">
+                    <td className="px-2 py-1 border border-border font-mono">
                       {actual.toFixed(6)}
                     </td>
-                    <td className="border border-border text-center font-mono">
+                    <td
+                      tabIndex={0}
+                      contentEditable={!l.locked}
+                      suppressContentEditableWarning={true}
+                      onFocus={() => {
+                        l.setSelectedDev(rowIndex)
+                        l.setManualInput(0)
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === "ArrowUp") l.increment()
+                        if (e.key === "ArrowDown") l.decrement()
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          l.applyManualInput()
+                          e.currentTarget.blur()
+                        }
+                      }}
+                      onInput={e => {
+                        const v = Number(e.currentTarget.innerText)
+                        if (!isNaN(v)) l.setManualInput(v)
+                      }}
+                      className={`px-2 py-1 border border-border text-center font-mono focus:outline-none cursor-pointer
+${l.selectedDev === rowIndex ? "bg-primary/20 border-primary text-primary font-bold" : "hover:bg-primary/10"}`}
+                    >
                       {r.count}
                     </td>
-                    <td className="border border-border px-1">
-                      <div
-                        className={`${outSpec ? "bg-error" : "bg-primary"} h-[10px]`}
-                        style={{ width: `${(r.count / maxCount) * 100}%` }}
-                      />
+
+
+                    <td className="px-2 py-1 border border-border">
+                      <div className={`${out ? "bg-error" : "bg-primary"} h-[10px]`}
+                        style={{ width: `${(r.count / maxCount) * 100}%` }} />
                     </td>
-                    <td className="border border-border text-center font-mono">
+                    <td className="px-2 py-1 border border-border text-center font-mono">
                       {r.count}
                     </td>
                   </tr>
-                );
+                )
               })}
             </tbody>
 
-            <tfoot className="bg-bg font-semibold cursor-default">
+            <tfoot className="bg-bg font-semibold">
               <tr>
-                <td colSpan={4} className="border border-border text-center">TOTAL</td>
-                <td className="border border-border text-center font-mono">{totalCount}</td>
+                <td colSpan={4} className="px-2 py-1 border border-border text-center">TOTAL</td>
+                <td className="px-2 py-1 border border-border text-center font-mono">{totalCount}</td>
               </tr>
             </tfoot>
           </table>
         </div>
       </div>
-<div className="p-3 border border-border rounded bg-card shadow-sm cursor-default">
-  <div className="font-medium text-sm mb-2">Data Statistik</div>
-
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-
-    <div className="space-y-1">
-      <div className="font-semibold text-secondary/80">Basic Stats</div>
-      <div>Mean actual: <span className="font-mono">{totalCount > 0 ? meanActual.toFixed(6) : "-"}</span> {unit}</div>
-      <div>Mean deviation: <span className="font-mono">{totalCount > 0 ? meanDeviation.toFixed(6) : "-"}</span></div>
-      <div>Std dev: <span className="font-mono">{totalCount > 1 ? stdDev.toFixed(6) : "-"}</span></div>
-      <div>Min / Max: <span className="font-mono">{totalCount > 0 ? `${minActual.toFixed(6)} / ${maxActual.toFixed(6)}` : "-"}</span> {unit}</div>
-    </div>
-
-    <div className="space-y-1">
-      <div className="font-semibold text-secondary/80">Specification</div>
-      <div>LSL actual: <span className="font-mono">{LSLActual.toFixed(6)}</span> {unit}</div>
-      <div>USL actual: <span className="font-mono">{USLActual.toFixed(6)}</span> {unit}</div>
-      <div>In spec: <span className="font-mono">{inSpec}</span></div>
-      <div>Out of spec: <span className="font-mono">{outSpec}</span> ({totalCount > 0 ? outSpecPercent.toFixed(2) : "0.00"}%)</div>
-    </div>
-
-    <div className="space-y-1">
-      <div className="font-semibold text-secondary/80">Capability</div>
-      <div>Cp: <span className="font-mono">{Cp > 0 ? Cp.toFixed(3) : "-"}</span></div>
-      <div>Cpk: <span className="font-mono">{Cpk > 0 ? Cpk.toFixed(3) : "-"}</span></div>
-      <div>Total samples: <span className="font-mono">{totalCount}</span></div>
-    </div>
-
-  </div>
-</div>
-
-
-
-      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3 cursor-default">
-        <div className="flex gap-2 items-center">
-          <span className="px-3 py-1 border border-border rounded bg-bg text-xs cursor-default">
-            {selectedDev !== null ? selectedDev : "-"}
-          </span>
+      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+        <div className="font-semibold flex items-center gap-2">
+          Keterangan Tabel
         </div>
 
+        <table className="w-full text-sm border border-border rounded overflow-hidden">
+          <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 w-[160px] flex items-center gap-2">
+                📉 <b>Deviation</b>
+              </td>
+              <td className="px-2 py-1">Offset dari nilai target dengan step bin size</td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                📏 <b>Actual</b>
+              </td>
+              <td className="px-2 py-1">Nilai aktual hasil pengukuran</td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                🔢 <b>Count</b>
+              </td>
+              <td className="px-2 py-1">Jumlah data pada deviasi tersebut</td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                📊 <b>Distribution</b>
+              </td>
+              <td className="px-2 py-1">Bar visual jumlah relatif terhadap maksimum</td>
+            </tr>
+
+            <tr>
+              <td className="px-2 py-1 flex items-center gap-2">
+                🟦 <b>Cell biru</b>
+              </td>
+              <td className="px-2 py-1">Sel aktif yang dapat diinput langsung via keyboard</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <div className="p-3 border border-border rounded bg-card shadow-sm">
+        <div className="font-medium text-sm mb-2">Adjust Count</div>
+
         <div className="flex gap-2">
-          <button disabled={selectedDev === null || locked} onClick={decrement}
-            className={`h-[32px] w-[32px] bg-muted rounded ${selectedDev === null || locked ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
-            –
-          </button>
-          <button disabled={selectedDev === null || locked} onClick={increment}
-            className={`h-[32px] w-[32px] bg-muted rounded ${selectedDev === null || locked ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
-            +
-          </button>
-          <input type="number" min={0} disabled={selectedDev === null || locked}
-            value={manualInput} onChange={e => setManualInput(Number(e.target.value))}
-            className={`h-[32px] bg-bg border border-border rounded px-2 w-[120px] font-mono ${selectedDev === null || locked ? "cursor-not-allowed" : "cursor-text"}`}
+          <button
+            disabled={l.selectedDev === null || l.locked}
+            onClick={l.decrement}
+            className={`h-[32px] w-[32px] bg-muted rounded border border-border ${l.selectedDev === null || l.locked
+              ? "cursor-not-allowed opacity-50"
+              : "cursor-pointer hover:border-primary"
+              }`}
+          >-</button>
+
+          <button
+            disabled={l.selectedDev === null || l.locked}
+            onClick={l.increment}
+            className={`h-[32px] w-[32px] bg-muted rounded border border-border ${l.selectedDev === null || l.locked
+              ? "cursor-not-allowed opacity-50"
+              : "cursor-pointer hover:border-primary"
+              }`}
+          >+</button>
+
+          <input
+            disabled={l.selectedDev === null || l.locked}
+            type="number"
+            className={`h-[32px] bg-bg border border-border rounded px-2 w-[120px] font-mono`}
+            value={l.manualInput}
+            onChange={e => l.setManualInput(Number(e.target.value))}
           />
-          <button disabled={selectedDev === null || locked} onClick={applyManualInput}
-            className={`h-[32px] px-3 rounded ${selectedDev === null || locked ? "cursor-not-allowed opacity-50 bg-primary/40 text-white" : "cursor-pointer bg-primary/80 text-white"}`}>
-            Set
-          </button>
-          <button disabled={selectedDev === null || locked} onClick={clearSelected}
-            className={`h-[32px] px-3 rounded ${selectedDev === null || locked ? "cursor-not-allowed opacity-50 bg-error/40 text-white" : "cursor-pointer bg-error/80 text-white"}`}>
-            Reset
-          </button>
-          <button onClick={clearAll}
-            disabled={locked}
-            className="h-[32px] px-3 bg-error/60 text-white rounded cursor-pointer">
-            Clear All
-          </button>
-          <button onClick={exportCSV}
-            className="h-[32px] px-3 bg-secondary text-white rounded cursor-pointer">
-            Export CSV
-          </button>
+
+          <button
+            disabled={l.selectedDev === null || l.locked}
+            onClick={l.applyManualInput}
+            className={`h-[32px] px-3 rounded border border-border ${l.selectedDev === null || l.locked
+              ? "cursor-not-allowed opacity-50 bg-primary/40"
+              : "cursor-pointer bg-primary/80 text-white"
+              }`}
+          >Set</button>
+
+          <button
+            disabled={l.selectedDev === null || l.locked}
+            onClick={l.clearSelected}
+            className={`h-[32px] px-3 rounded border border-border ${l.selectedDev === null || l.locked
+              ? "cursor-not-allowed opacity-50 bg-error/40"
+              : "cursor-pointer bg-error/80 text-white"
+              }`}
+          >Reset</button>
+
+          <button
+            disabled={l.locked}
+            onClick={l.clearAll}
+            className="h-[32px] px-3 bg-error/60 text-white rounded border border-border cursor-pointer hover:border-error"
+          >Clear All</button>
+
         </div>
       </div>
 
     </div>
-  );
+  )
+}
 
-};
-
-export default CheckSheetProductionDistribution;
+export default CheckSheetDistribution
