@@ -23,7 +23,7 @@ export interface SnapshotDistribution {
   locked: boolean
 }
 
-const DEFAULT_FIELDS = ["product", "operator", "line"]
+const DEFAULT_FIELDS = ["Product", "Operator", "Line"]
 const DEFAULT_METADATA: Record<string, string> = {
   date: new Date().toISOString().slice(0, 10),
   product: "",
@@ -235,6 +235,13 @@ const applyManualInput = () => {
   saveSnapshot()
   autoLockIfDataExists()
 }
+const updateCount = (index: number, value: number) => {
+  setRows(prev => prev.map((r, i) => 
+    i === index ? { ...r, count: value } : r
+  ))
+  saveSnapshot()
+  autoLockIfDataExists()
+}
 
 
 const clearSelected = () => {
@@ -285,6 +292,27 @@ const clearSelected = () => {
     saveSnapshot()
   }
 
+  const totalCount = rows.reduce((s, r) => s + r.count, 0)
+
+  const LSLActual = target + LSL * binSize
+  const USLActual = target + USL * binSize
+
+  let inSpec = 0
+  let outSpec = 0
+
+  rows.forEach(r => {
+    const actual = target + r.deviation * binSize
+    if (r.count <= 0) return
+    if (actual < LSLActual || actual > USLActual) outSpec += r.count
+    else inSpec += r.count
+  })
+
+  const worstDeviation = rows.reduce(
+    (max, cur) => cur.count > max.count ? cur : max,
+    { deviation: 0, count: -1 }
+  )
+
+
   return {
     target, setTarget,
     LSL, setLSL,
@@ -306,6 +334,13 @@ const clearSelected = () => {
     applyManualInput, clearSelected, clearAll,
     saveSnapshot,
     getShareLink,
-    doExportCSV, doExportExcel, doExportPDF
+    doExportCSV, doExportExcel, doExportPDF,updateCount,
+        totalCount,
+    inSpec,
+    outSpec,
+    worstDeviation,  
+    LSLActual,
+    USLActual,
+
   }
 }

@@ -153,15 +153,10 @@ const CheckSheetDefectiveItem = () => {
             <span>{l.isLocked ? "🔒" : "🔓"}</span>
             <span>{l.isLocked ? "Locked" : "Unlocked"}</span>
           </button>
-
         </div>
-
-
-
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
         <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
           <div className="font-medium text-sm">Informasi Produksi</div>
           <div className="grid grid-cols-2 gap-2">
@@ -363,16 +358,14 @@ const CheckSheetDefectiveItem = () => {
       <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
         <div className="overflow-auto max-h-[480px] scroll-m-0">
           <table className="w-full text-sm border-separate border-spacing-0 border border-border">
-            <thead className="bg-card text-secondary sticky top-0 z-10">
+            <thead className="bg-primary text-white sticky top-0 z-10">
               <tr>
-
-                {/* SORT NAME */}
-                <th className="px-2 py-2 text-center border border-border w-[40px]">
+                <th className="px-2 py-2 text-center border border-primary w-[40px]">
                   No
                 </th>
 
                 <th
-                  className="px-3 py-3 text-left border border-border cursor-pointer select-none hover:bg-primary/10"
+                  className="px-3 py-3 text-left border border-primary cursor-pointer select-none hover:bg-primary-hover"
                   onClick={() => l.setSort("name")}
                 >
                   <span className="flex items-center gap-1">
@@ -383,11 +376,10 @@ const CheckSheetDefectiveItem = () => {
                   </span>
                 </th>
 
-                {/* SORT PER DAY */}
                 {l.days.map(day => (
                   <th
                     key={day}
-                    className="px-3 py-2 text-center font-mono border border-border cursor-pointer select-none hover:bg-primary/10"
+                    className="px-3 py-2 text-center font-mono border border-primary cursor-pointer select-none hover:bg-primary-hover"
                     onClick={() => l.setSort(day)}
                   >
                     <span className="flex items-center justify-center gap-1">
@@ -399,9 +391,8 @@ const CheckSheetDefectiveItem = () => {
                   </th>
                 ))}
 
-                {/* SORT TOTAL */}
                 <th
-                  className="px-3 py-2 text-center font-mono border border-border cursor-pointer select-none hover:bg-primary/10"
+                  className="px-3 py-2 text-center font-mono border border-primary cursor-pointer select-none hover:bg-primary-hover"
                   onClick={() => l.setSort("total")}
                 >
                   <span className="flex items-center justify-center gap-1">
@@ -412,9 +403,8 @@ const CheckSheetDefectiveItem = () => {
                   </span>
                 </th>
 
-                {/* SORT PERCENT */}
                 <th
-                  className="px-3 py-2 text-center font-mono border border-border cursor-pointer select-none hover:bg-primary/10"
+                  className="px-3 py-2 text-center font-mono border border-primary cursor-pointer select-none hover:bg-primary-hover"
                   onClick={() => l.setSort("pct")}
                 >
                   <span className="flex items-center justify-center gap-1">
@@ -425,12 +415,12 @@ const CheckSheetDefectiveItem = () => {
                   </span>
                 </th>
 
-                <th className="px-3 py-2 text-center font-mono border border-border">
+                <th className="px-3 py-2 text-center font-mono border border-primary">
                   Cum %
                 </th>
-
               </tr>
             </thead>
+
 
             <tbody>
               {(() => {
@@ -448,36 +438,36 @@ const CheckSheetDefectiveItem = () => {
                       <td className="px-3 py-2 text-sm border border-border">
                         {c.name}
                       </td>
-{l.days.map((day) => (
-  <td
-    key={day}
-    tabIndex={0}
-    contentEditable={!l.isLocked && l.selectedCat === c.id && l.selectedDay === day}
-    suppressContentEditableWarning={true}
-    onFocus={() => {
-      l.setSelectedCat(c.id)
-      l.setSelectedDay(day)
-      l.setManualInput(c.counts[day])
-    }}
-    onClick={() => {
-      l.setSelectedCat(c.id)
-      l.setSelectedDay(day)
-    }}
-    onInput={e => {
-      const v = Number(e.currentTarget.innerText)
-      if (!isNaN(v)) l.setManualInput(v)
-    }}
-    onBlur={() => l.applyManualInput()}
-    className={`text-center font-mono border border-border px-3 py-2 focus:outline-none transition-colors
+                      {l.days.map((day) => (
+                        <td
+                          key={day}
+                          tabIndex={0}
+                          contentEditable={!l.isLocked && l.selectedCat === c.id && l.selectedDay === day}
+                          suppressContentEditableWarning={true}
+                          onFocus={() => {
+                            l.setSelectedCat(c.id)
+                            l.setSelectedDay(day)
+                            l.setManualInput(c.counts[day])
+                          }}
+                          onClick={() => {
+                            l.setSelectedCat(c.id)
+                            l.setSelectedDay(day)
+                          }}
+                          onInput={e => {
+                            const v = Number(e.currentTarget.innerText)
+                            if (!isNaN(v)) l.setManualInput(v)
+                          }}
+                          onBlur={() => l.applyManualInput()}
+                          className={`text-center font-mono border border-border px-3 py-2 focus:outline-none transition-colors
       ${l.selectedCat === c.id && l.selectedDay === day
-        ? "cursor-text bg-primary/20 text-primary font-bold"
-        : "cursor-pointer hover:bg-primary/10 hover:text-primary"
-      }
+                              ? "cursor-text bg-primary/20 text-primary font-bold"
+                              : "cursor-pointer hover:bg-primary/10 hover:text-primary"
+                            }
     `}
-  >
-    {c.counts[day]}
-  </td>
-))}
+                        >
+                          {c.counts[day]}
+                        </td>
+                      ))}
 
 
 
@@ -522,68 +512,103 @@ const CheckSheetDefectiveItem = () => {
 
         </div>
       </div>
-<div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
-  <div className="font-semibold flex items-center gap-2">
-    Keterangan Tabel
-  </div>
+      <div className="p-4 border border-primary rounded bg-primary/5 shadow-md space-y-4">
+        <div className="text-[15px] font-bold text-primary uppercase tracking-wide">
+          Kesimpulan
+        </div>
 
-  <table className="w-full text-sm border border-border rounded overflow-hidden">
-    <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
+        {l.allTotal === 0 ? (
+          <div className="text-sm text-secondary italic">
+            Masukkan data defect terlebih dahulu untuk memunculkan rekomendasi.
+          </div>
+        ) : (
+          <div className="space-y-4 text-sm">
 
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 w-[140px] flex items-center gap-2">
-          🔢 <b>No</b>
-        </td>
-        <td className="px-2 py-1">Urutan ranking defect berdasarkan total kejadian</td>
-      </tr>
+            <div className="p-3 border-l-4 border-primary bg-primary/10 rounded">
+              <div className="text-[13px] font-semibold text-primary">
+                Defect dominan (Pareto ≤ 80%)
+              </div>
+              <div className="text-[13px] font-medium">
+                {l.focusDefects.length === 0
+                  ? "Belum ada defect yang menonjol."
+                  : `${l.focusDefects.map(x => x.name).join(", ")} mencakup sekitar ${l.focusCoverage.toFixed(1)}% dari total defect`}
+              </div>
+            </div>
 
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          🏷️ <b>Jenis Defect</b>
-        </td>
-        <td className="px-2 py-1">Nama kategori defect yang diamati</td>
-      </tr>
+            <div className="p-3 border-l-4 border-error bg-error/10 rounded">
+              <div className="text-[13px] font-semibold text-error">
+                Hari/shift paling bermasalah
+              </div>
+              <div className="text-[13px] font-medium">
+                {l.worstDay.total === 0
+                  ? "Belum ada hari yang dominan."
+                  : `${l.worstDay.day} memiliki jumlah defect tertinggi (${l.worstDay.total})`}
+              </div>
+            </div>
 
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          📆 <b>Kolom Hari</b>
-        </td>
-        <td className="px-2 py-1">Frekuensi defect per hari atau shift</td>
-      </tr>
+          </div>
+        )}
+      </div>
+      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+        <div className="font-semibold flex items-center gap-2">
+          Keterangan Tabel
+        </div>
 
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          ➕ <b>Total</b>
-        </td>
-        <td className="px-2 py-1">Jumlah keseluruhan defect pada kategori tersebut</td>
-      </tr>
+        <table className="w-full text-sm border border-border rounded overflow-hidden">
+          <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
 
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          📊 <b>%</b>
-        </td>
-        <td className="px-2 py-1">Persentase defect terhadap total keseluruhan</td>
-      </tr>
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 w-[140px] flex items-center gap-2">
+                🔢 <b>No</b>
+              </td>
+              <td className="px-2 py-1">Urutan ranking defect berdasarkan total kejadian</td>
+            </tr>
 
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          🔴 <b>Cum %</b>
-        </td>
-        <td className="px-2 py-1">Persentase kumulatif untuk analisis Pareto</td>
-      </tr>
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                🏷️ <b>Jenis Defect</b>
+              </td>
+              <td className="px-2 py-1">Nama kategori defect yang diamati</td>
+            </tr>
 
-      <tr>
-        <td className="px-2 py-1 flex items-center gap-2">
-          🟦 <b>Cell biru</b>
-        </td>
-        <td className="px-2 py-1">Menandakan sel yang sedang dipilih / difokuskan</td>
-      </tr>
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                📆 <b>Kolom Hari</b>
+              </td>
+              <td className="px-2 py-1">Frekuensi defect per hari atau shift</td>
+            </tr>
 
-    </tbody>
-  </table>
-</div>
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                ➕ <b>Total</b>
+              </td>
+              <td className="px-2 py-1">Jumlah keseluruhan defect pada kategori tersebut</td>
+            </tr>
 
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                📊 <b>%</b>
+              </td>
+              <td className="px-2 py-1">Persentase defect terhadap total keseluruhan</td>
+            </tr>
 
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                🔴 <b>Cum %</b>
+              </td>
+              <td className="px-2 py-1">Persentase kumulatif untuk analisis Pareto</td>
+            </tr>
+
+            <tr>
+              <td className="px-2 py-1 flex items-center gap-2">
+                🟦 <b>Cell biru</b>
+              </td>
+              <td className="px-2 py-1">Menandakan sel yang sedang dipilih / difokuskan</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
 
       <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
         <div className="font-semibold flex items-center gap-2">
@@ -605,6 +630,8 @@ const CheckSheetDefectiveItem = () => {
           <span>Jadikan hasil visual ini sebagai dasar analisa akar penyebab berikutnya.</span>
         </div>
       </div>
+
+
 
 
       <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">

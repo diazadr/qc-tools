@@ -462,6 +462,37 @@ const doExportCSV = () => {
 
     return 0
   })
+  const paretoData = (() => {
+  let running = 0
+  return sortedCategories.map(c => {
+    const total = getRowTotal(c)
+    const pct = allTotal > 0 ? (total / allTotal) * 100 : 0
+    running += pct
+    return {
+      id: c.id,
+      name: c.name,
+      total,
+      pct,
+      cumPct: running
+    }
+  })
+})()
+
+const focusDefects = paretoData.filter(x => x.cumPct <= 80)
+
+const focusCoverage = focusDefects.length > 0
+  ? focusDefects[focusDefects.length - 1].cumPct
+  : 0
+
+const dayTotals = days.map(d => ({
+  day: d,
+  total: getColTotal(categories, d)
+}))
+
+const worstDay = dayTotals.length > 0
+  ? dayTotals.reduce((max, cur) => cur.total > max.total ? cur : max, dayTotals[0])
+  : { day: "", total: 0 }
+
 
 
   return {
@@ -496,6 +527,11 @@ const doExportCSV = () => {
     doExportPDF,
     setCellValue,
     getShareLink,
+      paretoData,
+  focusDefects,
+  focusCoverage,
+  dayTotals,
+  worstDay,
 
   };
 };
