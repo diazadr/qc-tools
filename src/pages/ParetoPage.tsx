@@ -1,337 +1,507 @@
-import { useRef, useState, useMemo } from "react";
-import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import Papa from "papaparse";
-import type { ParetoChartHandle } from "../components/charts/ParetoChart";
-import ParetoChart from "../components/charts/ParetoChart";
-import { useChecksheetStore } from "../store/useChecksheetStore";
-
-interface Row {
-  category: string;
-  count: number;
-  percentage: number;
-  cumulativePercentage: number;
-  operator?: string;
-  shift?: string;
-  line?: string;
-  date?: string;
-}
+import { useState, useRef } from "react"
+import {
+  HiChevronDown,
+  HiDocumentArrowUp,
+  HiDocumentArrowDown,
+  HiDocumentText,
+  HiDocumentDuplicate,
+  HiDocumentCheck,
+  HiShare
+} from "react-icons/hi2"
+import ParetoChart from "../components/charts/ParetoChart"
+import { useParetoLogic } from "./ParetoLogic"
 
 const ParetoPage = () => {
-  const chartRef = useRef<ParetoChartHandle | null>(null);
-  const store = useChecksheetStore();
-
-  const itemData = useMemo(() => {
-    const snap1 = store.getSnapshot("defective-item");
-    const snap2 = store.getSnapshot("defect-cause");
-    const snap3 = store.getSnapshot("defect-location");
-
-    if (snap1?.data?.categories) {
-      return snap1.data.categories.map((c: any) => ({
-        category: c.name,
-        count: Object.values(c.counts).reduce((s: any, n: any) => s + n, 0),
-      }));
-    }
-
-    if (snap2?.data?.dataset) {
-      const map: Record<string, number> = {};
-      snap2.data.dataset.forEach((entry: any) => {
-        map[entry.type] = (map[entry.type] || 0) + 1;
-      });
-      return Object.entries(map).map(([k, v]) => ({
-        category: k,
-        count: v,
-      }));
-    }
-
-    if (snap3?.data?.marks) {
-      const map: Record<string, number> = {};
-      snap3.data.marks.forEach((m: any) => {
-        map[m.defect] = (map[m.defect] || 0) + m.count;
-      });
-      return Object.entries(map).map(([k, v]) => ({
-        category: k,
-        count: v,
-      }));
-    }
-
-    return [];
-  }, [
-    store.snapshots["defective-item"],
-    store.snapshots["defect-cause"],
-    store.snapshots["defect-location"],
-  ]);
-
-  const [items, setItems] = useState<any[]>(itemData);
-  const [category, setCategory] = useState("");
-  const [count, setCount] = useState("");
-  const [operator, setOperator] = useState("");
-  const [shift, setShift] = useState("");
-  const [line, setLine] = useState("");
-
-  const [normalize, setNormalize] = useState(false);
-
-  const totalCount = items.reduce((sum, it) => sum + it.count, 0);
-
-  let sorted = [...items].sort((a, b) => b.count - a.count);
-
-  let smallGroups = sorted.filter(item => (item.count / totalCount) * 100 < 3);
-  let bigGroups = sorted.filter(item => (item.count / totalCount) * 100 >= 3);
-
-  if (smallGroups.length > 0) {
-    const sumSmall = smallGroups.reduce((sum, i) => sum + i.count, 0);
-    bigGroups.push({
-      category: "Others (<3%)",
-      count: sumSmall,
-      date: new Date().toLocaleString()
-    });
-  }
-
-  sorted = bigGroups;
-
-  let cumulative = 0;
-  const tableRows: Row[] = sorted.map((it) => {
-    cumulative += it.count;
-    let percentage = totalCount === 0 ? 0 : (it.count / totalCount) * 100;
-    let cumulativePercentage =
-      totalCount === 0 ? 0 : (cumulative / totalCount) * 100;
-
-    if (normalize) {
-      percentage = Number(((it.count / totalCount) * 1000).toFixed(1));
-    }
-
-    return {
-      ...it,
-      percentage: Number(percentage.toFixed(1)),
-      cumulativePercentage: Number(cumulativePercentage.toFixed(1)),
-    };
-  });
-
-  const summary = tableRows
-    .filter(r => r.cumulativePercentage <= 80)
-    .map(r => r.category)
-    .join(", ");
-
-  const addItem = () => {
-    if (!category.trim()) return;
-    const num = Number(count);
-    if (isNaN(num) || num < 0) return;
-
-    setItems([
-      ...items,
-      {
-        category,
-        count: num,
-        operator,
-        shift,
-        line,
-        date: new Date().toLocaleString(),
-      },
-    ]);
-    setCategory("");
-    setCount("");
-  };
-
-  const increment = (index: number) => {
-    const updated = [...items];
-    updated[index].count++;
-    setItems(updated);
-  };
-
-  const decrement = (index: number) => {
-    const updated = [...items];
-    if (updated[index].count > 0) updated[index].count--;
-    setItems(updated);
-  };
-
-  const reset = (index: number) => {
-    const updated = [...items];
-    updated[index].count = 0;
-    setItems(updated);
-  };
-
-  const clearAll = () => {
-    if (confirm("Hapus semua data?")) setItems([]);
-  };
-
-  const removeItem = (index: number) => {
-    const updated = items.filter((_, i) => i !== index);
-    setItems(updated);
-  };
-
-  const exportCSV = () => {
-    const csvData = Papa.unparse(
-      tableRows.map((r) => ({
-        Category: r.category,
-        Count: r.count,
-        Percent: r.percentage + (normalize ? "" : "%"),
-        CumPercent: r.cumulativePercentage + "%",
-        Operator: r.operator,
-        Shift: r.shift,
-        Line: r.line,
-        Date: r.date,
-      }))
-    );
-
-    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pareto.csv";
-    a.click();
-  };
-
-  const exportExcel = () => {
-    const dataToExport = tableRows.map((r) => ({
-      Category: r.category,
-      Count: r.count,
-      Percentage: r.percentage + (normalize ? "" : "%"),
-      CumulativePercentage: r.cumulativePercentage + "%",
-      Operator: r.operator,
-      Shift: r.shift,
-      Line: r.line,
-      Date: r.date,
-    }));
-
-    const sheet = XLSX.utils.json_to_sheet(dataToExport);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, sheet, "Pareto");
-    XLSX.writeFile(wb, "pareto.xlsx");
-  };
-
-  const exportChartImage = () => {
-    if (!chartRef.current) return;
-    const png = chartRef.current.getImageDataUrl();
-    if (!png) return;
-
-    const a = document.createElement("a");
-    a.href = png;
-    a.download = "pareto-chart.png";
-    a.click();
-  };
-
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.text("QC — Pareto Report", 14, 14);
-
-    autoTable(doc, {
-      startY: 20,
-      head: [["Kategori", "Jumlah", "%", "Kumulatif%", "Operator", "Shift", "Line", "Tanggal"]],
-      body: tableRows.map(r => [
-        r.category || "",
-        r.count || 0,
-        r.percentage + (normalize ? "" : "%") || "",
-        r.cumulativePercentage + "%" || "",
-        r.operator || "",
-        r.shift || "",
-        r.line || "",
-        r.date || "",
-      ]),
-    });
-
-    doc.text("Kesimpulan:", 12, doc.lastAutoTable.finalY + 10);
-    doc.text(`Kategori utama penyebab defect (>80%):`, 12, doc.lastAutoTable.finalY + 18);
-    doc.text(summary || "-", 12, doc.lastAutoTable.finalY + 26);
-    doc.save("pareto.pdf");
-  };
+  const l = useParetoLogic()
+  const [showImport, setShowImport] = useState(false)
+  const [showExport, setShowExport] = useState(false)
+  const [showTopNExport, setShowTopNExport] = useState(false)
+  const importRef = useRef<HTMLDivElement>(null)
+  const exportRef = useRef<HTMLDivElement>(null)
+  type NormalizationMode = "none" | "per100" | "per1000" | "per10000" | "custom"
 
   return (
-    <div className="w-full">
-      <h1 className="text-3xl font-bold text-text mb-6">Pareto Chart</h1>
+    <div className="text-[14px] space-y-4 select-none">
 
-      <div className="flex items-center mb-4 gap-2">
-        <input type="checkbox" checked={normalize} onChange={() => setNormalize(!normalize)} />
-        <label className="text-sm text-text">Normalisasi per 1000 unit produksi</label>
-      </div>
+      <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
+        <div className="font-semibold">Pareto Chart</div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigator.clipboard.writeText(l.getShareLink())}
+            className="h-[32px] px-3 flex items-center gap-2 bg-primary text-white rounded border cursor-pointer hover:bg-primary/80"
+            title="Copy share link"
+          >
+            <HiShare className="w-4 h-4" />
+            <span>Share Link</span>
+          </button>
 
-      <div className="qc-card mb-6 p-4">
-        <p className="text-secondary text-sm">Kategori dominan (≤80%):</p>
-        <p className="text-text font-semibold">{summary || "Belum ada data"}</p>
-      </div>
+          <div className="relative" ref={importRef}>
+            <button
+              onClick={() => setShowImport(v => !v)}
+              className="h-[32px] px-3 flex items-center gap-2 bg-muted text-foreground rounded border cursor-pointer hover:border-primary"
+            >
+              <HiDocumentArrowUp className="w-4 h-4" />
+              <span>Import</span>
+              <HiChevronDown className={`w-4 h-4 transition-transform duration-300 ${showImport ? "rotate-180" : ""}`} />
+            </button>
 
-      <div className="qc-card mb-6">
-        <h2 className="text-lg font-semibold text-text mb-4">Informasi Input</h2>
-        <div className="flex gap-3 flex-wrap">
-          <input type="text" placeholder="Operator" value={operator} onChange={(e) => setOperator(e.target.value)} className="border border-border px-3 py-2 rounded w-full md:w-48" />
-          <input type="text" placeholder="Shift" value={shift} onChange={(e) => setShift(e.target.value)} className="border border-border px-3 py-2 rounded w-full md:w-48" />
-          <input type="text" placeholder="Line / Machine" value={line} onChange={(e) => setLine(e.target.value)} className="border border-border px-3 py-2 rounded w-full md:w-48" />
+            {showImport && (
+              <div className="absolute right-0 mt-1 w-[200px] bg-card border border-border rounded shadow text-sm z-50">
+                <label htmlFor="importCSV" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20">
+                  <HiDocumentDuplicate className="w-4 h-4" />
+                  CSV (.csv)
+                </label>
+                <input
+                  id="importCSV"
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    l.importFromCSV(file)
+                    setShowImport(false)
+                  }}
+                />
+
+                <label htmlFor="importExcel" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20">
+                  <HiDocumentCheck className="w-4 h-4" />
+                  Excel (.xlsx)
+                </label>
+                <input
+                  id="importExcel"
+                  type="file"
+                  accept=".xlsx"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    l.importFromExcel(file)
+                    setShowImport(false)
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setShowExport(v => !v)}
+              className="h-[32px] px-3 flex items-center gap-2 bg-muted text-foreground rounded border cursor-pointer hover:border-primary"
+            >
+              <HiDocumentArrowDown className="w-4 h-4" />
+              <span>Export</span>
+              <HiChevronDown className={`w-4 h-4 transition-transform duration-300 ${showExport ? "rotate-180" : ""}`} />
+            </button>
+
+            {showExport && (
+              <div className="absolute right-0 mt-1 w-[220px] bg-card border border-border rounded shadow text-sm z-50">
+                <div
+                  onClick={() => { l.exportPDF(); setShowExport(false) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentText className="w-4 h-4" />
+                  PDF
+                </div>
+
+                <div
+                  onClick={() => { l.exportExcel(); setShowExport(false) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentCheck className="w-4 h-4" />
+                  Excel
+                </div>
+
+                <div
+                  onClick={() => { l.exportCSV(); setShowExport(false) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentDuplicate className="w-4 h-4" />
+                  CSV
+                </div>
+
+                <div
+                  onClick={() => { l.exportJSON(); setShowExport(false) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentText className="w-4 h-4" />
+                  JSON
+                </div>
+
+                <div
+                  onClick={() => { l.exportChartImage(); setShowExport(false) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentText className="w-4 h-4" />
+                  Chart Image
+                </div>
+
+                <div
+                  onClick={() => { setShowTopNExport(v => !v) }}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
+                >
+                  <HiDocumentDuplicate className="w-4 h-4" />
+                  Export Top-N
+                </div>
+
+                {showTopNExport && (
+                  <div className="px-3 py-2 border-t border-border">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { l.exportTopNToCSV(3); setShowExport(false); setShowTopNExport(false) }} className="qc-btn px-3 py-1">Top 3</button>
+                      <button onClick={() => { l.exportTopNToCSV(5); setShowExport(false); setShowTopNExport(false) }} className="qc-btn px-3 py-1">Top 5</button>
+                      <button onClick={() => { l.exportTopNToCSV(10); setShowExport(false); setShowTopNExport(false) }} className="qc-btn px-3 py-1">Top 10</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
+      <div className="relative p-3 border border-border rounded bg-card shadow-sm space-y-4">
+        <div className="font-medium text-sm">Konfigurasi Pareto</div>
 
-      <div className="qc-card mb-6">
-        <div className="flex gap-2">
-          <input type="text" placeholder="Nama Kategori" value={category} onChange={(e) => setCategory(e.target.value)} className="border border-border bg-card px-3 py-2 rounded w-full" />
-          <input type="number" placeholder="Jumlah" value={count} onChange={(e) => setCount(e.target.value)} className="border border-border bg-card px-3 py-2 rounded w-32" />
-          <button className="qc-btn px-4 py-2" onClick={addItem}>Tambah</button>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div className="flex items-end gap-2">
+              <label className="flex flex-col text-xs w-full">
+                Data Source
+                <select
+                  value={l.selectedSource}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    l.setSelectedSource(e.target.value as any)
+                  }}
+
+                  className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+                >
+                  <option value="defective-item">Defective Item</option>
+                  <option value="defect-cause">Defect Cause</option>
+                  <option value="defect-location">Defect Location</option>
+                </select>
+              </label>
+
+              <button
+                onClick={() => l.reloadFromSource()}
+                className="h-[36px] px-3 bg-primary text-white rounded border hover:bg-primary/80"
+                type="button"
+              >
+                Reload
+              </button>
+            </div>
+
+            <label className="flex flex-col text-xs">
+              Normalization
+              <select
+                value={l.normalizationMode}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                  l.setNormalizationMode(e.target.value as NormalizationMode)
+                }
+                className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+              >
+                <option value="none">None</option>
+                <option value="per100">Per 100</option>
+                <option value="per1000">Per 1000</option>
+                <option value="per10000">Per 10000</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+
+            {l.normalizationMode === "custom" && (
+              <label className="flex flex-col text-xs">
+                Custom base
+                <input
+                  type="number"
+                  value={l.customNormalizationBase}
+                  onChange={e => l.setCustomNormalizationBase(Number(e.target.value))}
+                  className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+                />
+              </label>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <label className="flex flex-col text-xs">
+              Small-group threshold (%)
+              <input
+                type="number"
+                value={l.smallGroupThreshold}
+                onChange={e => l.setSmallGroupThreshold(Number(e.target.value))}
+                min={0}
+                max={100}
+                className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+              />
+            </label>
+          </div>
         </div>
+
+        <button
+          onClick={() => l.clearAll()}
+          className="absolute bottom-2 right-3 h-[36px] px-3 bg-error/60 text-white rounded border"
+          type="button"
+        >
+          Hapus semua data
+        </button>
       </div>
 
-      <div className="qc-card mb-6 overflow-x-auto">
+
+
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+          <div className="font-medium text-sm">Informasi Produksi</div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              value={l.product}
+              onChange={e => {
+                l.setProduct(e.target.value)
+                l.setMetadata({ ...l.metadata, product: e.target.value })
+              }}
+              placeholder="Product"
+              className="h-[36px] bg-bg border border-border rounded px-2"
+            />
+
+            <input
+              type="date"
+              value={l.date}
+              onChange={e => {
+                l.setDate(e.target.value)
+                l.setMetadata({ ...l.metadata, date: e.target.value })
+              }}
+              className="h-[36px] bg-bg border border-border rounded px-2"
+            />
+          </div>
+
+          {/* CUSTOM FIELDS IKUT GRID PERSIS SEPERTI CONTOH LAMA */}
+          <div className="grid grid-cols-2 gap-2">
+            {l.customFields
+              .filter(f => f.toLowerCase() !== "product" && f.toLowerCase() !== "date")
+              .map(f => (
+                <div key={f} className="flex items-center gap-1">
+                  <input
+                    className="h-[36px] bg-bg border border-border rounded px-2 w-full"
+                    value={l.metadata[f] ?? ""}
+                    placeholder={f}
+                    onChange={e => l.setMetadata({ ...l.metadata, [f]: e.target.value })}
+                  />
+
+                  <button
+                    onClick={() => l.removeField(f)}
+                    className="text-red-500 text-xs hover:border-red-500 border border-border rounded px-[6px]"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+          </div>
+
+          {/* INPUT TAMBAH FIELD */}
+          <div className="flex gap-2 pt-1">
+            <input
+              value={l.newField}
+              onChange={e => l.setNewField(e.target.value)}
+              placeholder="Tambah field custom..."
+              className="h-[36px] bg-bg border border-border rounded px-2 flex-1"
+            />
+
+            <button
+              onClick={l.addField}
+              className="h-[36px] px-3 bg-muted text-foreground rounded border border-border"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+
+        <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+          <div className="font-medium text-sm">Kategori</div>
+
+          {/* Input nama & jumlah */}
+          <div className="flex gap-2 items-center">
+            <input
+              className="h-[32px] bg-bg border border-border rounded px-2 flex-1"
+              value={l.category}
+              placeholder="Nama Kategori"
+              onChange={e => l.setCategory(e.target.value)}
+            />
+
+            <input
+              type="number"
+              placeholder="Jumlah"
+              value={l.count}
+              onChange={e => l.setCount(e.target.value)}
+              className="h-[32px] bg-bg border border-border rounded px-2 w-[120px]"
+            />
+
+            <button
+              onClick={l.addItem}
+              className="h-[32px] px-3 bg-muted text-foreground rounded border border-border"
+            >
+              +
+            </button>
+          </div>
+
+
+          {/* Bubble list pindah ke bawah */}
+          <div className="flex flex-wrap gap-1 pt-2">
+            {l.items.map((c, i) => (
+              <div key={i} className="flex items-center gap-1">
+                <input
+                  className="px-2 py-1 border border-border rounded text-xs bg-bg cursor-text w-[120px]"
+                  value={c.category}
+                  onChange={e => l.renameCategory(i, e.target.value)}
+                />
+
+                <button
+                  onClick={() => l.removeItem(i)}
+                  className="text-red-500 text-xs hover:border-red-500 border border-border rounded px-[4px]"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+
+
+      </div>
+
+
+
+      <div className="qc-card mb-6 overflow-x-auto p-3">
         <h2 className="text-lg font-semibold text-text mb-4">Data Pareto</h2>
+
         <table className="text-sm w-full border-collapse">
           <thead>
             <tr className="border-border border-b text-secondary">
-              <th className="text-left py-2">Kategori</th>
+              <th className="text-left py-2">No</th>
+              <th className="text-left py-2 cursor-pointer" onClick={() => l.setSort("category")}>
+                <div className="flex items-center gap-1">
+                  Kategori
+                  {l.sortKey === "category" && <span className="text-xs">{l.sortAsc ? "▲" : "▼"}</span>}
+                </div>
+              </th>
               <th className="text-center">Jumlah</th>
-              <th className="text-center">%</th>
+              <th className="text-center">Nilai</th>
               <th className="text-center">Cum %</th>
-              <th className="text-center">+ / −</th>
-              <th className="text-center">Delete</th>
             </tr>
           </thead>
+
           <tbody>
-            {tableRows.map((row, index) => (
-              <tr key={index} className="border-border border-b">
-                <td className="py-2">{row.category}</td>
-                <td className="py-2 text-center">{row.count}</td>
-                <td className="py-2 text-center">{row.percentage}{normalize ? "" : "%"}</td>
-                <td className="py-2 text-center">{row.cumulativePercentage}%</td>
-                <td className="py-2 text-center">
-                  <button className="px-2 py-1 qc-btn" onClick={() => decrement(index)}>−1</button>
-                  <button className="px-2 py-1 qc-btn ml-1" onClick={() => increment(index)}>+1</button>
+            {l.tableRows.map((row, index) => (
+              <tr key={index} className="border-b hover:bg-primary/5 transition-colors">
+                <td className="px-2 py-2 text-center">{index + 1}</td>
+                <td className="px-3 py-2">
+                  <div>{row.category}</div>
                 </td>
-                <td className="py-2 text-center">
-                  <button className="text-error font-bold" onClick={() => removeItem(index)}>Delete</button>
-                  <button className="ml-3 text-secondary" onClick={() => reset(index)}>Reset</button>
-                </td>
+
+                <td className="px-3 py-2 text-center font-mono">{row.count}</td>
+
+                <td className="px-3 py-2 text-center">{l.normalizationMode === "none" ? `${row.percentage}%` : `${row.percentage}`}</td>
+
+                <td className="px-3 py-2 text-center">{row.cumulativePercentage}%</td>
               </tr>
             ))}
 
-            {tableRows.length === 0 && (
+            {l.tableRows.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-4 text-secondary">Belum ada data</td>
+                <td colSpan={7} className="text-center py-6 text-secondary">Belum ada data</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-
       <div className="qc-card mb-6">
-        <h2 className="text-lg font-semibold text-text mb-4">
-          Pareto Chart – Defect Category / Grafik Pareto – Kategori Defect
-        </h2>
+        <h2 className="text-lg font-semibold text-text mb-4">Pareto Chart</h2>
         <ParetoChart
-          ref={chartRef}
-          data={sorted}
+          ref={l.chartRef}
+          data={l.sorted}
           show80Line={true}
           yLeftLabel="Count"
           yRightLabel="Cumulative %"
+          product={l.product}
+          line={l.line}
+          shift={l.shift}
+          date={l.date}
         />
       </div>
 
-      <div className="qc-card mb-10">
-        <h2 className="text-lg font-semibold text-text mb-4">Export</h2>
-        <div className="flex flex-wrap gap-3">
-          <button className="qc-btn px-4 py-2" onClick={exportPDF}>Export PDF</button>
-          <button className="qc-btn px-4 py-2" onClick={exportExcel}>Export Excel</button>
-          <button className="qc-btn px-4 py-2" onClick={exportCSV}>Export CSV</button>
-          <button className="qc-btn px-4 py-2" onClick={exportChartImage}>Export Grafik</button>
-          <button className="text-error font-bold ml-2" onClick={clearAll}>Hapus semua data</button>
-        </div>
-      </div>
-    </div>
-  );
-};
+      <div className="p-4 border border-primary rounded bg-primary/5 shadow-md space-y-4">
+        <div className="text-[15px] font-bold text-primary uppercase tracking-wide">Kesimpulan</div>
 
-export default ParetoPage;
+        {l.totalCount === 0 ? (
+          <div className="text-sm text-secondary italic">Masukkan data kategori terlebih dahulu untuk memunculkan rekomendasi.</div>
+        ) : (
+          <div className="space-y-4 text-sm">
+            <div className="p-3 border-l-4 border-primary bg-primary/10 rounded">
+              <div className="text-[13px] font-semibold text-primary">Defect dominan (Pareto ≤ 80%)</div>
+              <div className="text-[13px] font-medium">{l.focusDefects.length === 0 ? "Belum ada defect yang menonjol." : `${l.focusDefects.map(x => x.category).join(", ")} mencakup sekitar ${l.focusCoverage.toFixed(1)}% dari total`}</div>
+            </div>
+            {/* Top-loss Recommendation */}
+            <div className="p-3 border-l-4 border-warning bg-warning/10 rounded">
+              <div className="text-[13px] font-semibold text-warning">Top-loss Highlight</div>
+              <div className="text-[13px] font-medium">
+                {l.topLossRecommendation || "Belum ada data top-loss."}
+              </div>
+            </div>
+
+            <div className="p-3 border-l-4 border-secondary bg-secondary/10 rounded">
+              <div className="text-[13px] font-semibold text-secondary">Analitik tambahan</div>
+              <div className="text-[13px]">
+                <div>Dominant: {l.dominantCategory ? `${l.dominantCategory.category} (${((l.dominantCategory.count / l.totalCount) * 100).toFixed(1)}%)` : "-"}</div>
+                <div>Dominant ratio: {l.dominantRatio.toFixed(3)}</div>
+                <div>Imbalance score: {l.imbalanceScore.toFixed(3)}</div>
+                <div>Flags: {l.isSkewed ? "Skewed" : l.isBalanced ? "Balanced" : "Normal"}</div>
+              </div>
+            </div>
+
+            <div className="p-3 border-l-4 border-error bg-error/10 rounded">
+              <div className="text-[13px] font-semibold text-error">Saran Tindakan</div>
+              <div className="text-[13px]">Fokuskan perbaikan pada kategori yang masuk ke coverage ≤ 80%, lalu lakukan root cause analysis untuk masing-masing kategori utama.</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+        <div className="font-semibold flex items-center gap-2">Keterangan Tabel</div>
+
+        <table className="w-full text-sm border border-border rounded overflow-hidden">
+          <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 w-[140px] flex items-center gap-2">🔢 <b>No</b></td>
+              <td className="px-2 py-1">Urutan ranking category berdasarkan jumlah kejadian</td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">🏷️ <b>Jenis</b></td>
+              <td className="px-2 py-1">Nama kategori defect yang diamati</td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">➕ <b>Total</b></td>
+              <td className="px-2 py-1">Jumlah keseluruhan defect pada kategori tersebut</td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">📊 <b>% / Value</b></td>
+              <td className="px-2 py-1">Persentase atau nilai normalisasi sesuai konfigurasi</td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">🔴 <b>Cum %</b></td>
+              <td className="px-2 py-1">Persentase kumulatif untuk analisis Pareto</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  )
+}
+
+export default ParetoPage

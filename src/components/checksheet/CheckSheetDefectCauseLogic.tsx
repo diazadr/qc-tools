@@ -34,7 +34,6 @@ export const useDefectCauseLogic = () => {
   const [defectType, setDefectType] = useState(DEFAULT_DEFECT)
 
   const [dataset, setDataset] = useState<Entry[]>([])
-  const [history, setHistory] = useState<Entry[][]>([])
 
   const [metadata, setMetadata] = useState<Record<string,string>>({
     product:"",
@@ -44,15 +43,21 @@ export const useDefectCauseLogic = () => {
   })
 
   const [customFields, setCustomFields] = useState<string[]>([
-    "product","lot","date","inspector"
+    "product","lot","inspector"
   ])
+  const [newField, setNewField] = useState("")
+
 
   const [isLocked, setIsLocked] = useState(false)
+const [newWorker, setNewWorker] = useState("")
 
   const [selectedWorker, setSelectedWorker] = useState<string | null>(null)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [selectedShift, setSelectedShift] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState<string | null>(null)
+  const [activeTabWD, setActiveTabWD] = useState<"worker" | "defect">("worker")
+  const [manualInput, setManualInput] = useState(0)
+
 
   const [cellBuffer, setCellBuffer] = useState("")
   const cellRefs = useRef<Record<string, Record<string, HTMLTableCellElement | null>>>({})
@@ -78,7 +83,6 @@ export const useDefectCauseLogic = () => {
   const totalAll = dataset.length
 
   const addDataset = (arr: Entry[]) => {
-    setHistory(h => [...h, dataset])
     setDataset(arr)
     autoLockIfDataExists(arr)
   }
@@ -139,37 +143,53 @@ export const useDefectCauseLogic = () => {
     ))
   }
 
+const applyManualInput = () => {
+  if (!selectedWorker || !selectedDay || !selectedShift || !selectedType) return
+  if (isLocked) return
+  if (manualInput < 0) return
+
+  setCount(selectedWorker, selectedDay, selectedShift, selectedType, manualInput)
+  saveSnapshot()
+}
+
+
   const resetWorker = () => {
     if (!selectedWorker) return
     if (isLocked) return
     addDataset(dataset.filter(e => e.worker!==selectedWorker))
   }
+const addField = () => {
+  if (isLocked) return
+  const v = newField.trim()
+  if (!v) return
+  if (customFields.includes(v)) return
 
-  const resetAll = () => {
-    if (isLocked) return
-    addDataset([])
-    setSelectedWorker(null)
-    setSelectedDay(null)
-    setSelectedShift(null)
-    setSelectedType(null)
-  }
+  setCustomFields([...customFields, v])
+  setMetadata({ ...metadata, [v]: "" })
+  setNewField("")
+  saveSnapshot()
+}
 
-  const clearAll = () => {
-    if (!confirm("Clear ALL data?")) return
-    setDataset([])
-    setWorkers(DEFAULT_WORKERS)
-    setDefectType(DEFAULT_DEFECT)
-    setMetadata({product:"",lot:"",date:"",inspector:""})
-    setIsLocked(false)
-  }
+const clearAll = () => {
+  if (!confirm("Clear ALL data?")) return
 
-  const undo = () => {
-    if (isLocked) return
-    const last = history[history.length-1]
-    if (!last) return
-    setHistory(h => h.slice(0,-1))
-    setDataset(last)
-  }
+  setDataset([])
+  setWorkers(DEFAULT_WORKERS)
+  setDefectType(DEFAULT_DEFECT)
+
+  setMetadata({
+    product: "",
+    lot: "",
+    date: "",
+    inspector: ""
+  })
+
+  setCustomFields(["product", "lot", "inspector"])
+  setNewField("")
+  setIsLocked(false)
+
+  store.setSnapshot("defect-cause", null)
+}
 
   const addWorker = (w: string) => {
     if (isLocked) return
@@ -225,16 +245,17 @@ export const useDefectCauseLogic = () => {
     saveSnapshot()
   }
 
-  const saveSnapshot = () => {
-    store.setSnapshot("defect-cause", {
-      metadata,
-      customFields,
-      workers,
-      defectType,
-      dataset,
-      isLocked
-    })
-  }
+const saveSnapshot = () => {
+  if (!metadata) return
+  store.setSnapshot("defect-cause", {
+    metadata,
+    customFields,
+    workers,
+    defectType,
+    dataset,
+    isLocked
+  })
+}
 
   const getShareLink = () => {
     const d = {
@@ -261,32 +282,36 @@ export const useDefectCauseLogic = () => {
     return 0
   })
 
-  useEffect(()=>{
-    const params = new URLSearchParams(window.location.search)
-    const encoded = params.get("cause")
-    if (encoded) {
-      try {
-        const d = JSON.parse(atob(encoded))
-        setMetadata(d.metadata || {product:"",lot:"",date:"",inspector:""})
-        setCustomFields(d.customFields || ["product","lot","date","inspector"])
-        setWorkers(d.workers||DEFAULT_WORKERS)
-        setDefectType(d.defectType||DEFAULT_DEFECT)
-        setDataset(d.dataset||[])
-        setIsLocked(d.isLocked??false)
-      } catch {}
-      return
-    }
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search)
+  const encoded = params.get("cause")
+  if (encoded) {
+    try {
+      const d = JSON.parse(atob(encoded))
+      setMetadata(d.metadata || { product: "", lot: "", date: "", inspector: "" })
+      setCustomFields(d.customFields || ["product", "lot", "inspector"])
+      setWorkers(d.workers || DEFAULT_WORKERS)
+      setDefectType(d.defectType || DEFAULT_DEFECT)
+      setDataset(d.dataset || [])
+      setIsLocked(d.isLocked ?? false)
+    } catch {}
+    return
+  }
 
-    const snap = store.getSnapshot("defect-cause")
-    if (!snap) return
-    const d = snap.data as DefectCauseSnapshot
-    setMetadata(d.metadata||{product:"",lot:"",date:"",inspector:""})
-    setCustomFields(d.customFields || ["product","lot","date","inspector"])
-    setWorkers(d.workers||DEFAULT_WORKERS)
-    setDefectType(d.defectType||DEFAULT_DEFECT)
-    setDataset(d.dataset||[])
-    setIsLocked(d.isLocked||false)
-  },[])
+  const snap = store.getSnapshot("defect-cause")
+
+  if (!snap || !snap.data) return   // ← FIX DI SINI
+
+  const d = snap.data as DefectCauseSnapshot
+
+  setMetadata(d.metadata || { product: "", lot: "", date: "", inspector: "" })
+  setCustomFields(d.customFields || ["product", "lot", "inspector"])
+  setWorkers(d.workers || DEFAULT_WORKERS)
+  setDefectType(d.defectType || DEFAULT_DEFECT)
+  setDataset(d.dataset || [])
+  setIsLocked(d.isLocked || false)
+}, [])
+
 
 const doExportCSV = () => {
   exportCSV(
@@ -372,24 +397,24 @@ return {
   totalAll,
 
 cellRefs, cellBuffer, setCellBuffer, 
-
+manualInput, setManualInput,
+applyManualInput,
   handleCellKeyDown,
-
+newWorker, setNewWorker,
   increment,
   decrement,
   resetCell,
   resetWorker,
-  resetAll,
   clearAll,
-  undo,
   addWorker,
   renameWorker,
   addDefectSymbol,
   renameDefectSymbol,
-
+ newField, setNewField,     // ← tambah
+  addField,   
   setWorkers,        // ← tambahkan ini
   setDefectType,     // ← tambahkan ini
-
+activeTabWD, setActiveTabWD,
   saveSnapshot,
   getShareLink,
 

@@ -15,67 +15,97 @@ interface Props {
   show80Line?: boolean;
   yLeftLabel?: string;
   yRightLabel?: string;
+  product?: string;
+  line?: string;
+  shift?: string;
+  date?: string;
 }
 
 const ParetoChart = forwardRef<ParetoChartHandle, Props>(
-  ({ data, show80Line = true, yLeftLabel = "Count", yRightLabel = "Cumulative %" }, ref) => {
+  (
+    {
+      data,
+      show80Line = true,
+      yLeftLabel = "Count",
+      yRightLabel = "Cumulative %",
+      product,
+      line,
+      shift,
+      date,
+    },
+    ref
+  ) => {
     const chartRef = useRef<any>(null);
 
-    const sorted = [...data].sort((a, b) => b.count - a.count);
-    const total = sorted.reduce((sum, d) => sum + d.count, 0);
+    const sorted = data;
+    const total = sorted.reduce((s, x) => s + x.count, 0);
 
     let cumulative = 0;
-    const categories = sorted.map((d) => d.category);
+    const categories = sorted.map((d) => `${d.category} (${d.count})`);
+
     const counts = sorted.map((d) => d.count);
+
     const cumulativePercent = sorted.map((d) => {
       cumulative += d.count;
-      const pct = total === 0 ? 0 : (cumulative / total) * 100;
-      return Number(pct.toFixed(1));
+      return Number(((cumulative / total) * 100).toFixed(1));
     });
+
+    const topColors = ["#DC2626", "#EA580C", "#EAB308"];
+    const barColors = sorted.map((d, i) => {
+      if (d.category.includes("Others (")) return "#6B7280";
+      return i < 3 ? topColors[i] : "#1E3A8A";
+    });
+
+    const metaTitle = [
+      product ? `Product: ${product}` : "",
+      line ? `Line: ${line}` : "",
+      shift ? `Shift: ${shift}` : "",
+      date ? `Date: ${date}` : "",
+    ]
+      .filter(Boolean)
+      .join(" | ") || "Pareto Chart";
 
     const option = {
       title: {
-        text: "Pareto Chart of Defect Categories",
+        text: metaTitle,
         left: "center",
-        textStyle: {
-          fontSize: 14,
-          fontWeight: 600,
-          color: "#e2e8f0",
-        },
+        textStyle: { fontSize: 14, fontWeight: 600, color: "#e2e8f0" },
       },
+
       tooltip: {
         trigger: "axis",
-        formatter: (params: any) => {
-          const bar = params[0];
-          const line = params[1];
+        formatter: (params: any[]) => {
+          const bar = params.find((p) => p.seriesType === "bar");
+          const line = params.find((p) => p.seriesType === "line");
+          const rank = bar?.dataIndex + 1;
+
           return `
-            <b>${bar.name}</b><br/>
-            ${yLeftLabel}: ${bar.value}<br/>
-            ${yRightLabel}: ${line.value}%
+<b>${bar?.name}</b><br/>
+Rank: ${rank}<br/>
+${yLeftLabel}: ${bar?.value}<br/>
+${yRightLabel}: ${line?.value}%
           `;
         },
-        axisPointer: { type: "shadow" },
       },
+
       grid: {
         top: 60,
         left: 50,
         right: 60,
-        bottom: 50,
+        bottom: 80,
       },
-      xAxis: [
-        {
-          type: "category",
-          data: categories,
-          axisLabel: {
-            rotate: 0,  // ISO: tegak lurus
-            color: "#9ca3af",
-            fontSize: 12,
-          },
-          axisLine: {
-            lineStyle: { color: "#475569" },
-          },
+
+      xAxis: {
+        type: "category",
+        data: categories,
+        axisLabel: {
+          rotate: 35,
+          color: "#9ca3af",
+          fontSize: 11,
         },
-      ],
+        axisLine: { lineStyle: { color: "#475569" } },
+      },
+
       yAxis: [
         {
           type: "value",
@@ -88,11 +118,12 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
           name: yRightLabel,
           min: 0,
           max: 100,
-          axisLabel: { formatter: "{value}%" },
           axisLine: { lineStyle: { color: "#9ca3af" } },
+          axisLabel: { formatter: "{value}%" },
           splitLine: { show: false },
         },
       ],
+
       series: [
         {
           name: yLeftLabel,
@@ -100,27 +131,32 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
           data: counts,
           barWidth: "60%",
           itemStyle: {
-            color: "#1E3A8A",
+            color: (p: any) => barColors[p.dataIndex],
           },
         },
+
         {
           name: yRightLabel,
           type: "line",
           yAxisIndex: 1,
           data: cumulativePercent,
-          smooth: true,
-          symbol: "circle",      // ISO: titik di poin
-          symbolSize: 8,
-          itemStyle: {
+          symbol: "circle",
+          symbolSize: 9,
+          smooth: false,
+          label: {
+            show: true,
+            position: "top",
+            formatter: "{c}%",
             color: "#F59E0B",
+            fontSize: 10,
           },
-          lineStyle: {
-            width: 3,
-          },
+          itemStyle: { color: "#F59E0B" },
+          lineStyle: { width: 3, color: "#F59E0B" },
 
           ...(show80Line
             ? {
                 markLine: {
+                  yAxisIndex: 1,
                   data: [{ yAxis: 80 }],
                   lineStyle: {
                     type: "dashed",
@@ -130,8 +166,8 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
                   label: {
                     formatter: "80% Threshold",
                     position: "end",
-                    fontSize: 11,
                     color: "#22C55E",
+                    fontSize: 11,
                   },
                 },
               }
@@ -143,8 +179,7 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
     useImperativeHandle(ref, () => ({
       getImageDataUrl: () => {
         if (!chartRef.current) return null;
-        const instance = chartRef.current.getEchartsInstance();
-        return instance.getDataURL({
+        return chartRef.current.getEchartsInstance().getDataURL({
           type: "png",
           pixelRatio: 3,
           backgroundColor: "#FFFFFF",
@@ -156,12 +191,13 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
       <ReactECharts
         ref={chartRef}
         option={option}
-        style={{ height: 380, width: "100%" }}
+        notMerge={true}
+        lazyUpdate={false}
+        style={{ height: 420, width: "100%" }}
       />
     );
   }
 );
 
 ParetoChart.displayName = "ParetoChart";
-
 export default ParetoChart;

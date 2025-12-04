@@ -1,12 +1,10 @@
 import { useDefectLocationLogic } from "./CheckSheetDefectLocationLogic"
 import { useState, useRef } from "react"
-import { HiChevronDown, HiDocumentArrowUp, HiDocumentArrowDown, HiDocumentText, HiDocumentCheck, HiDocumentDuplicate, HiShare } from "react-icons/hi2"
+import { HiChevronDown, HiDocumentArrowDown, HiDocumentText, HiDocumentCheck, HiDocumentDuplicate, HiShare } from "react-icons/hi2"
 
 const CheckSheetDefectLocation = () => {
   const l = useDefectLocationLogic()
-  const [showImport, setShowImport] = useState(false)
   const [showExport, setShowExport] = useState(false)
-  const importRef = useRef<HTMLDivElement>(null)
   const exportRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -25,61 +23,6 @@ const CheckSheetDefectLocation = () => {
             <span>Share Link</span>
           </button>
 
-          <div className="relative" ref={importRef}>
-            <button
-              onClick={() => setShowImport((v: any) => !v)}
-              className="h-[32px] px-3 flex items-center gap-2 bg-muted text-foreground rounded border cursor-pointer hover:border-primary"
-            >
-              <HiDocumentArrowUp className="w-4 h-4" />
-              <span>Import</span>
-              <HiChevronDown
-                className={`w-4 h-4 transition-transform duration-300 ${showImport ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {showImport && (
-              <div className="absolute right-0 mt-1 w-[160px] bg-card border border-border rounded shadow text-sm z-50">
-
-                <label
-                  htmlFor="importExcelLocation"
-                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
-                >
-                  <HiDocumentCheck className="w-4 h-4" />
-                  Excel (.xlsx)
-                </label>
-                <input
-                  id="importExcelLocation"
-                  type="file"
-                  accept=".xlsx"
-                  className="hidden"
-                  onChange={e => {
-                    const f = e.target.files?.[0]
-                    if (!f) return
-                    setShowImport(false)
-                  }}
-                />
-
-                <label
-                  htmlFor="importCSVLocation"
-                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-primary/20"
-                >
-                  <HiDocumentDuplicate className="w-4 h-4" />
-                  CSV (.csv)
-                </label>
-                <input
-                  id="importCSVLocation"
-                  type="file"
-                  accept=".csv"
-                  className="hidden"
-                  onChange={e => {
-                    const f = e.target.files?.[0]
-                    if (!f) return
-                    setShowImport(false)
-                  }}
-                />
-              </div>
-            )}
-          </div>
 
           <div className="relative" ref={exportRef}>
             <button
@@ -164,28 +107,32 @@ const CheckSheetDefectLocation = () => {
               </div>
             ))}
 
-<div className="relative w-full">
-  <input
-    disabled={l.locked}
-    type="date"
-    style={{ 
-      WebkitAppearance: "none", 
-      MozAppearance: "none", 
-      appearance: "none" 
-    }}
-    className={`h-[32px] bg-bg text-foreground border-[0.5px] border-border rounded pl-2 pr-7 w-full 
+            <div className="relative w-full">
+              <input
+                disabled={l.locked}
+                type="text"
+                placeholder="YYYY-MM-DD"
+                className={`h-[32px] bg-bg text-foreground border-[0.5px] border-border rounded pl-2 pr-7 w-full 
       placeholder:text-muted
       focus:outline-none focus:outline-[2px] focus:outline-primary
-      ${l.locked ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary"}
+      ${l.locked ? "cursor-not-allowed opacity-60" : "cursor-text hover:border-primary"}
     `}
-    value={l.metadata.Date}
-    onChange={e => l.setMetadata({ ...l.metadata, Date: e.target.value })}
-  />
+                value={l.metadata.Date}
+                onChange={e => l.setMetadata({ ...l.metadata, Date: e.target.value })}
+                onFocus={e => {
+                  e.target.type = "date"
+                  e.target.showPicker?.()
+                }}
+                onBlur={e => {
+                  if (!e.target.value) e.target.type = "text"
+                }}
+              />
 
-  <span className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-    📅
-  </span>
-</div>
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                📅
+              </span>
+            </div>
+
 
 
           </div>
@@ -449,117 +396,117 @@ const CheckSheetDefectLocation = () => {
           </table>
         </div>
       </div>
-<div className="p-4 border border-primary rounded bg-primary/5 shadow-md space-y-4">
-  <div className="text-[15px] font-bold text-primary uppercase tracking-wide">
-    Kesimpulan Lokasi
-  </div>
-
-  {l.totalAll === 0 ? (
-    <div className="text-sm text-secondary italic">
-      Masukkan data defect terlebih dahulu untuk memunculkan analisa lokasi.
-    </div>
-  ) : (
-    <div className="space-y-4 text-sm">
-
-      <div className="p-3 border-l-4 border-primary bg-primary/10 rounded">
-        <div className="text-[13px] font-semibold text-primary">
-          Area dominan (Pareto ≤ 80%)
+      <div className="p-4 border border-primary rounded bg-primary/5 shadow-md space-y-4">
+        <div className="text-[15px] font-bold text-primary uppercase tracking-wide">
+          Kesimpulan Lokasi
         </div>
-        <div className="text-[13px] font-medium">
-          {l.focusLocations.length === 0
-            ? "Tidak ada area dominan."
-            : `${l.focusLocations.map(x => x.circ).join(", ")} mencakup sekitar ${Math.min(100, l.focusLocations[l.focusLocations.length-1].cumPct).toFixed(1)}% dari total defect`}
-        </div>
+
+        {l.totalAll === 0 ? (
+          <div className="text-sm text-secondary italic">
+            Masukkan data defect terlebih dahulu untuk memunculkan analisa lokasi.
+          </div>
+        ) : (
+          <div className="space-y-4 text-sm">
+
+            <div className="p-3 border-l-4 border-primary bg-primary/10 rounded">
+              <div className="text-[13px] font-semibold text-primary">
+                Area dominan (Pareto ≤ 80%)
+              </div>
+              <div className="text-[13px] font-medium">
+                {l.focusLocations.length === 0
+                  ? "Tidak ada area dominan."
+                  : `${l.focusLocations.map(x => x.circ).join(", ")} mencakup sekitar ${Math.min(100, l.focusLocations[l.focusLocations.length - 1].cumPct).toFixed(1)}% dari total defect`}
+              </div>
+            </div>
+
+            <div className="p-3 border-l-4 border-error bg-error/10 rounded">
+              <div className="text-[13px] font-semibold text-error">
+                Lokasi paling bermasalah
+              </div>
+              <div className="text-[13px] font-medium">
+                {l.worstLocation == null
+                  ? "Belum ada lokasi bermasalah."
+                  : `Lokasi ${l.worstLocation} memiliki jumlah defect tertinggi (${l.totalRow(l.worstLocation)})`}
+              </div>
+            </div>
+
+          </div>
+        )}
       </div>
+      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+        <div className="font-semibold flex items-center gap-2">
+          Keterangan Tabel (Defect Location)
+        </div>
 
-      <div className="p-3 border-l-4 border-error bg-error/10 rounded">
-        <div className="text-[13px] font-semibold text-error">
-          Lokasi paling bermasalah
-        </div>
-        <div className="text-[13px] font-medium">
-          {l.worstLocation == null
-            ? "Belum ada lokasi bermasalah."
-            : `Lokasi ${l.worstLocation} memiliki jumlah defect tertinggi (${l.totalRow(l.worstLocation)})`}
-        </div>
+        <table className="w-full text-sm border border-border rounded overflow-hidden">
+          <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 w-[140px] flex items-center gap-2">
+                🟩 <b>Circular (baris)</b>
+              </td>
+              <td className="px-2 py-1">
+                Posisi keliling (misalnya sektor A–H)
+              </td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                🟥 <b>Radial (kolom)</b>
+              </td>
+              <td className="px-2 py-1">
+                Posisi arah radius dari pusat ke luar (misalnya 1–10)
+              </td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                🔢 <b>Nilai sel</b>
+              </td>
+              <td className="px-2 py-1">
+                Jumlah defect pada titik lokasi tertentu (Circular & Radial)
+              </td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                🏷️ <b>Jenis Defect</b>
+              </td>
+              <td className="px-2 py-1">
+                Ditampilkan kecil di bawah nilai sel jika jumlah &gt; 0
+              </td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                🔴 <b>Severity</b>
+              </td>
+              <td className="px-2 py-1">
+                Menunjukkan tingkat keparahan (Minor, Major, Critical) dengan warna label
+              </td>
+            </tr>
+
+            <tr className="border-b border-border">
+              <td className="px-2 py-1 flex items-center gap-2">
+                🟦 <b>Cell biru</b>
+              </td>
+              <td className="px-2 py-1">
+                Menandakan sel yang sedang dipilih / difokuskan
+              </td>
+            </tr>
+
+            <tr>
+              <td className="px-2 py-1 flex items-center gap-2">
+                ➕ <b>Total</b>
+              </td>
+              <td className="px-2 py-1">
+                Jumlah keseluruhan defect per Circular maupun total keseluruhan
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
       </div>
-
-    </div>
-  )}
-</div>
-<div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
-  <div className="font-semibold flex items-center gap-2">
-    Keterangan Tabel (Defect Location)
-  </div>
-
-  <table className="w-full text-sm border border-border rounded overflow-hidden">
-    <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
-
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 w-[140px] flex items-center gap-2">
-          🟩 <b>Circular (baris)</b>
-        </td>
-        <td className="px-2 py-1">
-          Posisi keliling (misalnya sektor A–H)
-        </td>
-      </tr>
-
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          🟥 <b>Radial (kolom)</b>
-        </td>
-        <td className="px-2 py-1">
-          Posisi arah radius dari pusat ke luar (misalnya 1–10)
-        </td>
-      </tr>
-
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          🔢 <b>Nilai sel</b>
-        </td>
-        <td className="px-2 py-1">
-          Jumlah defect pada titik lokasi tertentu (Circular & Radial)
-        </td>
-      </tr>
-
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          🏷️ <b>Jenis Defect</b>
-        </td>
-        <td className="px-2 py-1">
-          Ditampilkan kecil di bawah nilai sel jika jumlah &gt; 0
-        </td>
-      </tr>
-
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          🔴 <b>Severity</b>
-        </td>
-        <td className="px-2 py-1">
-          Menunjukkan tingkat keparahan (Minor, Major, Critical) dengan warna label
-        </td>
-      </tr>
-
-      <tr className="border-b border-border">
-        <td className="px-2 py-1 flex items-center gap-2">
-          🟦 <b>Cell biru</b>
-        </td>
-        <td className="px-2 py-1">
-          Menandakan sel yang sedang dipilih / difokuskan
-        </td>
-      </tr>
-
-      <tr>
-        <td className="px-2 py-1 flex items-center gap-2">
-          ➕ <b>Total</b>
-        </td>
-        <td className="px-2 py-1">
-          Jumlah keseluruhan defect per Circular maupun total keseluruhan
-        </td>
-      </tr>
-
-    </tbody>
-  </table>
-</div>
 
       <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
 
@@ -575,65 +522,73 @@ const CheckSheetDefectLocation = () => {
         </div>
 
         <div className="flex gap-2 justify-between">
-          <div className="flex gap-2">
-            <button
-              disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+     <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3 relative">
 
-              onClick={l.decrement}
-              className={`h-[32px] w-[32px] bg-muted rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer hover:border-primary"
-                }`}
-            >
-              -
-            </button>
+  <div className="flex gap-2">
+    <button
+      disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+      onClick={l.decrement}
+      className={`h-[32px] w-[32px] bg-muted rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
+        ? "cursor-not-allowed opacity-50"
+        : "cursor-pointer hover:border-primary"
+        }`}
+    >
+      -
+    </button>
 
-            <button
-              disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+    <button
+      disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+      onClick={l.increment}
+      className={`h-[32px] w-[32px] bg-muted rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
+        ? "cursor-not-allowed opacity-50"
+        : "cursor-pointer hover:border-primary"
+        }`}
+    >
+      +
+    </button>
 
-              onClick={l.increment}
-              className={`h-[32px] w-[32px] bg-muted rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer hover:border-primary"
-                }`}
-            >
-              +
-            </button>
+    <input
+      type="number"
+      min={0}
+      className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 w-[120px] font-mono ${!l.selectedCirc || !l.selectedRad ? "cursor-not-allowed" : "cursor-text"
+        }`}
+      value={l.manual}
+      onChange={e => l.setManual(Number(e.target.value))}
+      disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+    />
 
-            <input
-              type="number"
-              min={0}
-              className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 w-[120px] font-mono ${!l.selectedCirc || !l.selectedRad ? "cursor-not-allowed" : "cursor-text"
-                }`}
-              value={l.manual}
-              onChange={e => l.setManual(Number(e.target.value))}
-              disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+    <button
+      disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+      onClick={l.applyManual}
+      className={`h-[32px] px-3 rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
+        ? "cursor-not-allowed opacity-50 bg-primary/40 text-white"
+        : "cursor-pointer bg-primary/80 text-white hover:border-primary"
+        }`}
+    >
+      Set
+    </button>
 
-            />
+    <button
+      disabled={!l.selectedCirc}
+      onClick={() => l.setCellValue(l.selectedCirc!, l.selectedRad!, 0)}
+      className={`h-[32px] px-3 rounded border-[0.5px] ${!l.selectedCirc
+        ? "cursor-not-allowed opacity-50 bg-error/40 text-white"
+        : "cursor-pointer bg-error/80 text-white hover:border-error"
+        }`}
+    >
+      Reset
+    </button>
+  </div>
 
-            <button
-              disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+  {!l.defectType && (
+    <div className="absolute bottom-1 left-1 text-error text-xs italic">
+      Isi defect type terlebih dahulu
+    </div>
+  )}
 
-              onClick={l.applyManual}
-              className={`h-[32px] px-3 rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
-                ? "cursor-not-allowed opacity-50 bg-primary/40 text-white"
-                : "cursor-pointer bg-primary/80 text-white hover:border-primary"
-                }`}
-            >
-              Set
-            </button>
+</div>
 
-            <button
-              disabled={!l.selectedCirc}
-              onClick={() => l.setCellValue(l.selectedCirc!, l.selectedRad!, 0)}
-              className={`h-[32px] px-3 rounded border-[0.5px] ${!l.selectedCirc
-                ? "cursor-not-allowed opacity-50 bg-error/40 text-white"
-                : "cursor-pointer bg-error/80 text-white hover:border-error"
-                }`}
-            >
-              Reset
-            </button>
-          </div>
+
 
           <div className="flex gap-2">
             <button

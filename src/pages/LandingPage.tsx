@@ -122,7 +122,7 @@ const LandingPage = () => {
             <p className="text-secondary mt-4 max-w-md">{t("workflow.subtitle")}</p>
 
             <motion.div className="qc-number-image mt-10"
-              style={{ backgroundImage: "url('/img/3qcworkflow.jpg')" }}
+              style={{ backgroundImage: "url('/img/3qcworkflow.webp')",  backgroundSize: "60%",backgroundPosition: "left", }}
               variants={itemFade}>
               3 QC
             </motion.div>
@@ -157,7 +157,7 @@ const LandingPage = () => {
           variants={staggerContainer}>
           <motion.div variants={itemFade}>
             <FlipFeatureCard
-              frontImage="/img/factory1.jpg"
+              frontImage="/img/who-industry.webp"
               titleFront={t("landing.who1_title")}
               titleBack={t("landing.who1_title")}
               descriptionBack={t("landing.who1_desc")}
@@ -166,7 +166,7 @@ const LandingPage = () => {
 
           <motion.div variants={itemFade}>
             <FlipFeatureCard
-              frontImage="/img/1.jpg"
+              frontImage="/img/who-mahasiswa.webp"
               titleFront={t("landing.who2_title")}
               titleBack={t("landing.who2_title")}
               descriptionBack={t("landing.who2_desc")}
@@ -175,7 +175,7 @@ const LandingPage = () => {
 
           <motion.div variants={itemFade}>
             <FlipFeatureCard
-              frontImage="/img/qcstaff.webp"
+              frontImage="/img/who-department.webp"
               titleFront={t("landing.who3_title")}
               titleBack={t("landing.who3_title")}
               descriptionBack={t("landing.who3_desc")}
