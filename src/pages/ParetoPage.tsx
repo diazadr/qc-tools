@@ -159,145 +159,143 @@ const ParetoPage = () => {
 
         </div>
       </div>
-      <div className="relative p-3 border border-border rounded bg-card shadow-sm space-y-4">
-        <div className="font-medium text-sm">Konfigurasi Pareto</div>
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <div className="flex items-end gap-2">
-              <label className="flex flex-col text-xs w-full">
-                Data Source
-                <select
-                  value={l.selectedSource}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    l.setSelectedSource(e.target.value as any)
-                  }}
+  {/* CARD 1 — Konfigurasi Pareto */}
+  <div className="relative p-3 border border-border rounded bg-card shadow-sm space-y-4">
+    <div className="font-medium text-sm">Konfigurasi Pareto</div>
 
-                  className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
-                >
-                  <option value="defective-item">Defective Item</option>
-                  <option value="defect-cause">Defect Cause</option>
-                  <option value="defect-location">Defect Location</option>
-                </select>
-              </label>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="space-y-3">
+        <div className="flex items-end gap-2">
+          <label className="flex flex-col text-xs w-full">
+            Data Source
+            <select
+              value={l.selectedSource}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                l.setSelectedSource(e.target.value as any)
+              }}
+              className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+            >
+              <option value="defective-item">Defective Item</option>
+              <option value="defect-cause">Defect Cause</option>
+              <option value="defect-location">Defect Location</option>
+            </select>
+          </label>
 
-              <button
-                onClick={() => l.reloadFromSource()}
-                className="h-[36px] px-3 bg-primary text-white rounded border hover:bg-primary/80"
-                type="button"
-              >
-                Reload
-              </button>
-            </div>
-
-            <label className="flex flex-col text-xs">
-              Normalization
-              <select
-                value={l.normalizationMode}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  l.setNormalizationMode(e.target.value as NormalizationMode)
-                }
-                className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
-              >
-                <option value="none">None</option>
-                <option value="per100">Per 100</option>
-                <option value="per1000">Per 1000</option>
-                <option value="per10000">Per 10000</option>
-                <option value="custom">Custom</option>
-              </select>
-            </label>
-
-            {l.normalizationMode === "custom" && (
-              <label className="flex flex-col text-xs">
-                Custom base
-                <input
-                  type="number"
-                  value={l.customNormalizationBase}
-                  onChange={e => l.setCustomNormalizationBase(Number(e.target.value))}
-                  className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
-                />
-              </label>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            <label className="flex flex-col text-xs">
-              Small-group threshold (%)
-              <input
-                type="number"
-                value={l.smallGroupThreshold}
-                onChange={e => l.setSmallGroupThreshold(Number(e.target.value))}
-                min={0}
-                max={100}
-                className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
-              />
-            </label>
-          </div>
+          <button
+            onClick={() => l.reloadFromSource()}
+            className="h-[36px] px-3 bg-primary text-white rounded border hover:bg-primary/80"
+            type="button"
+          >
+            Reload
+          </button>
         </div>
 
-        <button
-          onClick={() => l.clearAll()}
-          className="absolute bottom-2 right-3 h-[36px] px-3 bg-error/60 text-white rounded border"
-          type="button"
-        >
-          Hapus semua data
-        </button>
-      </div>
+        <label className="flex flex-col text-xs">
+          Normalization
+          <select
+            value={l.normalizationMode}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              l.setNormalizationMode(e.target.value as NormalizationMode)
+            }
+            className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+          >
+            <option value="none">None</option>
+            <option value="per100">Per 100</option>
+            <option value="per1000">Per 1000</option>
+            <option value="per10000">Per 10000</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
-          <div className="font-medium text-sm">Kategori</div>
-
-          {/* Input nama & jumlah */}
-          <div className="flex gap-2 items-center">
-            <input
-              className="h-[32px] bg-bg border border-border rounded px-2 flex-1"
-              value={l.category}
-              placeholder="Nama Kategori"
-              onChange={e => l.setCategory(e.target.value)}
-            />
-
+        {l.normalizationMode === "custom" && (
+          <label className="flex flex-col text-xs">
+            Custom base
             <input
               type="number"
-              placeholder="Jumlah"
-              value={l.count}
-              onChange={e => l.setCount(e.target.value)}
-              className="h-[32px] bg-bg border border-border rounded px-2 w-[120px]"
+              value={l.customNormalizationBase}
+              onChange={e => l.setCustomNormalizationBase(Number(e.target.value))}
+              className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
             />
-
-            <button
-              onClick={l.addItem}
-              className="h-[32px] px-3 bg-muted text-foreground rounded border border-border"
-            >
-              +
-            </button>
-          </div>
-
-
-          {/* Bubble list pindah ke bawah */}
-          <div className="flex flex-wrap gap-1 pt-2">
-            {l.items.map((c, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <input
-                  className="px-2 py-1 border border-border rounded text-xs bg-bg cursor-text w-[120px]"
-                  value={c.category}
-                  onChange={e => l.renameCategory(i, e.target.value)}
-                />
-
-                <button
-                  onClick={() => l.removeItem(i)}
-                  className="text-red-500 text-xs hover:border-red-500 border border-border rounded px-[4px]"
-                >
-                  X
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-
-
+          </label>
+        )}
       </div>
+
+      <div className="space-y-3">
+        <label className="flex flex-col text-xs">
+          Small-group threshold (%)
+          <input
+            type="number"
+            value={l.smallGroupThreshold}
+            onChange={e => l.setSmallGroupThreshold(Number(e.target.value))}
+            min={0}
+            max={100}
+            className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+          />
+        </label>
+      </div>
+    </div>
+
+    <button
+      onClick={() => l.clearAll()}
+      className="absolute bottom-2 right-3 h-[32px] px-3 bg-error/60 text-white rounded border-[0.5px] cursor-pointer hover:border-error"
+      type="button"
+    >
+      Hapus semua data
+    </button>
+  </div>
+
+  {/* CARD 2 — Kategori */}
+  <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+    <div className="font-medium text-sm">Kategori</div>
+
+    <div className="flex gap-2 items-center">
+      <input
+        className="h-[32px] bg-bg border border-border rounded px-2 flex-1"
+        value={l.category}
+        placeholder="Nama Kategori"
+        onChange={e => l.setCategory(e.target.value)}
+      />
+
+      <input
+        type="number"
+        placeholder="Jumlah"
+        value={l.count}
+        onChange={e => l.setCount(e.target.value)}
+        className="h-[32px] bg-bg border border-border rounded px-2 w-[120px]"
+      />
+
+      <button
+        onClick={l.addItem}
+        className="h-[32px] px-3 bg-muted text-foreground rounded border-[0.5px] cursor-pointer hover:border-primary"
+      >
+        +
+      </button>
+    </div>
+
+    <div className="flex flex-wrap gap-1 pt-2">
+      {l.items.map((c, i) => (
+        <div key={i} className="flex items-center gap-1">
+          <input
+            className="px-2 py-1 border border-border rounded text-xs bg-bg cursor-text w-[120px]"
+            value={c.category}
+            onChange={e => l.renameCategory(i, e.target.value)}
+          />
+
+          <button
+            onClick={() => l.removeItem(i)}
+            className="text-red-500 text-xs hover:border-red-500 border-[0.5px] rounded px-[4px] cursor-pointer"
+          >
+            X
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+
+</div>
+
 
 
 
@@ -352,9 +350,6 @@ const ParetoPage = () => {
           show80Line={true}
           yLeftLabel="Count"
           yRightLabel="Cumulative %"
-          product={l.product}
-          line={l.line}
-          shift={l.shift}
           date={l.date}
         />
       </div>

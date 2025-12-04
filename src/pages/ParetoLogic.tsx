@@ -6,14 +6,14 @@ import Papa from "papaparse"
 import type { ParetoChartHandle } from "../components/charts/ParetoChart"
 import { useChecksheetStore } from "../store/useChecksheetStore"
 
+
+ //  TYPE DEFINITIONS
+
 type ParetoSourceKey = "defective-item" | "defect-cause" | "defect-location"
 
 interface ParetoItem {
   category: string
   count: number
-  operator?: string
-  shift?: string
-  line?: string
   date?: string
 }
 
@@ -26,23 +26,22 @@ type NormalizationMode = "none" | "per100" | "per1000" | "per10000" | "custom"
 
 interface ParetoSnapshot {
   items: ParetoItem[]
-  operator: string
-  shift: string
-  line: string
-  product: string
   date: string
   normalizationMode: NormalizationMode
   customNormalizationBase: number
   smallGroupThreshold: number
   selectedSource: ParetoSourceKey
-  customFields: string[]
   metadata: Record<string, string>
 }
 
-const DEFAULT_CUSTOM_FIELDS = ["Product"]
-const DEFAULT_METADATA: Record<string, string> = { product: "", date: "" }
+const DEFAULT_METADATA: Record<string, string> = { date: "" }
+
+  // HOOK UTAMA
 
 export const useParetoLogic = () => {
+
+  //   1) STATE & VARIABEL UI
+
   const chartRef = useRef<ParetoChartHandle | null>(null)
   const store = useChecksheetStore()
 
@@ -50,20 +49,18 @@ export const useParetoLogic = () => {
   const [items, setItems] = useState<ParetoItem[]>([])
   const [category, setCategory] = useState("")
   const [count, setCount] = useState("")
-  const [operator, setOperator] = useState("")
-  const [shift, setShift] = useState("")
-  const [line, setLine] = useState("")
-  const [product, setProduct] = useState("")
   const [date, setDate] = useState("")
   const [normalizationMode, setNormalizationMode] = useState<NormalizationMode>("none")
   const [customNormalizationBase, setCustomNormalizationBase] = useState<number>(1000)
   const [smallGroupThreshold, setSmallGroupThreshold] = useState<number>(3)
-  const [sortKey, setSortKey] = useState<"category" | "count" | "percentage" | "cumulativePercentage" | null>("count")
+  const [sortKey, setSortKey] = useState<
+    "category" | "count" | "percentage" | "cumulativePercentage" | null
+  >("count")
   const [sortAsc, setSortAsc] = useState<boolean>(false)
 
-  const [customFields, setCustomFields] = useState<string[]>(DEFAULT_CUSTOM_FIELDS)
-  const [newField, setNewField] = useState("")
   const [metadata, setMetadata] = useState<Record<string, string>>(DEFAULT_METADATA)
+
+  //   2) LOAD DATA (STORE, URL SNAPSHOT)
 
   const loadFromSource = (source: ParetoSourceKey): ParetoItem[] => {
     const snap1 = store.getSnapshot("defective-item")
@@ -107,6 +104,7 @@ export const useParetoLogic = () => {
     setItems(srcItems)
   }
 
+  // snapshot URL / store
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search)
@@ -114,16 +112,11 @@ export const useParetoLogic = () => {
       if (encoded) {
         const decoded = JSON.parse(atob(encoded)) as Partial<ParetoSnapshot>
         if (decoded.items && Array.isArray(decoded.items)) setItems(decoded.items)
-        if (typeof decoded.operator === "string") setOperator(decoded.operator)
-        if (typeof decoded.shift === "string") setShift(decoded.shift)
-        if (typeof decoded.line === "string") setLine(decoded.line)
-        if (typeof decoded.product === "string") setProduct(decoded.product)
         if (typeof decoded.date === "string") setDate(decoded.date)
         if (decoded.normalizationMode) setNormalizationMode(decoded.normalizationMode)
         if (typeof decoded.customNormalizationBase === "number") setCustomNormalizationBase(decoded.customNormalizationBase)
         if (typeof decoded.smallGroupThreshold === "number") setSmallGroupThreshold(decoded.smallGroupThreshold)
         if (decoded.selectedSource) setSelectedSource(decoded.selectedSource)
-        if (Array.isArray(decoded.customFields)) setCustomFields(decoded.customFields)
         if (decoded.metadata && typeof decoded.metadata === "object") setMetadata(decoded.metadata)
         return
       }
@@ -132,19 +125,12 @@ export const useParetoLogic = () => {
     const snap = store.getSnapshot("pareto")
     if (snap?.data) {
       const data = snap.data as ParetoSnapshot
-  if (Array.isArray(data.items) && data.selectedSource === selectedSource) {
-  setItems(data.items)
-}
-      if (typeof data.operator === "string") setOperator(data.operator)
-      if (typeof data.shift === "string") setShift(data.shift)
-      if (typeof data.line === "string") setLine(data.line)
-      if (typeof data.product === "string") setProduct(data.product)
+      if (Array.isArray(data.items) && data.selectedSource === selectedSource) setItems(data.items)
       if (typeof data.date === "string") setDate(data.date)
       if (data.normalizationMode) setNormalizationMode(data.normalizationMode)
       if (typeof data.customNormalizationBase === "number") setCustomNormalizationBase(data.customNormalizationBase)
       if (typeof data.smallGroupThreshold === "number") setSmallGroupThreshold(data.smallGroupThreshold)
       if (data.selectedSource) setSelectedSource(data.selectedSource)
-      if (Array.isArray((data as any).customFields)) setCustomFields((data as any).customFields)
       if ((data as any).metadata && typeof (data as any).metadata === "object") setMetadata((data as any).metadata)
       return
     }
@@ -159,40 +145,35 @@ export const useParetoLogic = () => {
       }
     }
   }, [])
-useEffect(() => {
-  reloadFromSource()
-}, [selectedSource])
 
+  useEffect(() => {
+    reloadFromSource()
+  }, [selectedSource])
+
+  // Simpan ke snapshot store
   useEffect(() => {
     const snap: ParetoSnapshot = {
       items,
-      operator,
-      shift,
-      line,
-      product,
       date,
       normalizationMode,
       customNormalizationBase,
       smallGroupThreshold,
       selectedSource,
-      customFields,
       metadata,
     }
     store.setSnapshot("pareto", snap)
   }, [
     items,
-    operator,
-    shift,
-    line,
-    product,
     date,
     normalizationMode,
     customNormalizationBase,
     smallGroupThreshold,
     selectedSource,
-    customFields,
     metadata,
   ])
+
+
+  //   3) RUMUS PARETO (TOTAL, SORTING, GROUPING, NORMALIZATION)
 
   const totalCount = useMemo(() => {
     return items.reduce((sum, it) => sum + (Number.isFinite(it.count) ? it.count : 0), 0)
@@ -208,18 +189,22 @@ useEffect(() => {
     if (totalCount <= 0 || smallGroupThreshold <= 0) return baseSorted
     const small: ParetoItem[] = []
     const big: ParetoItem[] = []
+
     baseSorted.forEach(it => {
       const pct = (it.count / totalCount) * 100
       if (pct < smallGroupThreshold) small.push(it)
       else big.push(it)
     })
+
     if (small.length === 0) return big
+
     const sumSmall = small.reduce((s, i) => s + i.count, 0)
     const others: ParetoItem = {
       category: `Others (<${smallGroupThreshold}%)`,
       count: sumSmall,
       date: new Date().toLocaleString(),
     }
+
     return [...big, others]
   }, [baseSorted, totalCount, smallGroupThreshold])
 
@@ -247,6 +232,7 @@ useEffect(() => {
       const rawPct = totalCount === 0 ? 0 : (it.count / totalCount) * 100
       const cumPct = totalCount === 0 ? 0 : (cumulative / totalCount) * 100
       let displayValue = rawPct
+
       if (normalizationMode !== "none" && totalCount > 0) {
         let base = 1000
         if (normalizationMode === "per100") base = 100
@@ -255,6 +241,7 @@ useEffect(() => {
         else if (normalizationMode === "custom") base = customNormalizationBase > 0 ? customNormalizationBase : 1000
         displayValue = (it.count / totalCount) * base
       }
+
       return {
         ...it,
         percentage: Number(displayValue.toFixed(1)),
@@ -263,11 +250,10 @@ useEffect(() => {
     })
   }, [sorted, totalCount, normalizationMode, customNormalizationBase])
 
+    // 4) ANALISIS TAMBAHAN PARETO
+
   const summary = useMemo(() => {
-    return tableRows
-      .filter(r => r.cumulativePercentage <= 80)
-      .map(r => r.category)
-      .join(", ")
+    return tableRows.filter(r => r.cumulativePercentage <= 80).map(r => r.category).join(", ")
   }, [tableRows])
 
   const focusDefects = useMemo(() => {
@@ -278,17 +264,15 @@ useEffect(() => {
     if (focusDefects.length === 0) return 0
     return focusDefects[focusDefects.length - 1].cumulativePercentage
   }, [focusDefects])
-const topLossRecommendation = useMemo(() => {
-  if (tableRows.length === 0) return ""
 
-  const top3 = tableRows.slice(0, 3)
-  const top3Total = top3.reduce((s, r) => s + r.count, 0)
-  const pct = totalCount === 0 ? 0 : (top3Total / totalCount) * 100
-
-  const names = top3.map(r => r.category).join(", ")
-
-  return `Top 3 defect (${names}) menyumbang ${pct.toFixed(1)}% kerusakan — prioritaskan kategori ini.`
-}, [tableRows, totalCount])
+  const topLossRecommendation = useMemo(() => {
+    if (tableRows.length === 0) return ""
+    const top3 = tableRows.slice(0, 3)
+    const top3Total = top3.reduce((s, r) => s + r.count, 0)
+    const pct = totalCount === 0 ? 0 : (top3Total / totalCount) * 100
+    const names = top3.map(r => r.category).join(", ")
+    return `Top 3 defect (${names}) menyumbang ${pct.toFixed(1)}% kerusakan — prioritaskan kategori ini.`
+  }, [tableRows, totalCount])
 
   const dominantCategory = useMemo(() => {
     if (tableRows.length === 0) return null as ParetoRow | null
@@ -316,14 +300,8 @@ const topLossRecommendation = useMemo(() => {
     return sumAbs
   }, [tableRows, totalCount])
 
-  const isSkewed = useMemo(() => {
-    return dominantRatio >= 0.5
-  }, [dominantRatio])
-
-  const isBalanced = useMemo(() => {
-    return imbalanceScore < 0.3
-  }, [imbalanceScore])
-
+  const isSkewed = useMemo(() => dominantRatio >= 0.5, [dominantRatio])
+  const isBalanced = useMemo(() => imbalanceScore < 0.3, [imbalanceScore])
   const isSparse = useMemo(() => {
     if (tableRows.length === 0 || totalCount === 0) return false
     return tableRows.every(r => r.count / totalCount < 0.05)
@@ -344,6 +322,9 @@ const topLossRecommendation = useMemo(() => {
     if (isSparse) parts.push("Sebagian besar kategori memiliki frekuensi rendah")
     return parts.join(" | ")
   }, [dominantCategory, totalCount, focusDefects, focusCoverage, isSkewed, isBalanced, isSparse])
+
+
+ //    5) LOGIKA UI — MENAMBAH / EDIT / DELETE ITEM
 
   const setSort = (key: "category" | "count" | "percentage" | "cumulativePercentage") => {
     if (sortKey === key) {
@@ -373,9 +354,6 @@ const topLossRecommendation = useMemo(() => {
       updated[existingIndex] = {
         ...updated[existingIndex],
         count: updated[existingIndex].count + num,
-        operator,
-        shift,
-        line,
         date: new Date().toLocaleString(),
       }
       setItems(updated)
@@ -385,9 +363,6 @@ const topLossRecommendation = useMemo(() => {
         {
           category: trimmed,
           count: num,
-          operator,
-          shift,
-          line,
           date: new Date().toLocaleString(),
         },
       ])
@@ -450,25 +425,8 @@ const topLossRecommendation = useMemo(() => {
     setItems(updated)
   }
 
-  const addField = () => {
-    const f = newField.trim()
-    if (!f) return
-    if (f === "date") return
-    if (customFields.includes(f)) return
-    const newCustom = [...customFields, f]
-    setCustomFields(newCustom)
-    setMetadata({ ...metadata, [f]: "" })
-    setNewField("")
-  }
 
-  const removeField = (f: string) => {
-    if (f === "date") return
-    const newFields = customFields.filter(x => x !== f)
-    const m = { ...metadata }
-    delete m[f]
-    setCustomFields(newFields)
-    setMetadata(m)
-  }
+ //    6) EXPORT (CSV, EXCEL, JSON, PDF, IMAGE)
 
   const exportCSV = () => {
     const isPercentMode = normalizationMode === "none"
@@ -478,11 +436,7 @@ const topLossRecommendation = useMemo(() => {
         Count: r.count,
         Value: r.percentage + (isPercentMode ? "%" : ""),
         CumPercent: r.cumulativePercentage + "%",
-        Operator: r.operator,
-        Shift: r.shift,
-        Line: r.line,
         Date: r.date,
-        Product: product,
         ...metadata,
       }))
     )
@@ -503,11 +457,7 @@ const topLossRecommendation = useMemo(() => {
         Count: r.count,
         Value: r.percentage + (isPercentMode ? "%" : ""),
         CumPercent: r.cumulativePercentage + "%",
-        Operator: r.operator,
-        Shift: r.shift,
-        Line: r.line,
         Date: r.date,
-        Product: product,
         ...metadata,
       }))
     )
@@ -526,11 +476,7 @@ const topLossRecommendation = useMemo(() => {
       Count: r.count,
       Value: r.percentage + (isPercentMode ? "%" : ""),
       CumulativePercentage: r.cumulativePercentage + "%",
-      Operator: r.operator,
-      Shift: r.shift,
-      Line: r.line,
       Date: r.date,
-      Product: product,
       ...metadata,
     }))
     const sheet = XLSX.utils.json_to_sheet(data)
@@ -544,16 +490,11 @@ const topLossRecommendation = useMemo(() => {
       items,
       tableRows,
       totalCount,
-      product,
       date,
-      operator,
-      shift,
-      line,
       normalizationMode,
       customNormalizationBase,
       smallGroupThreshold,
       selectedSource,
-      customFields,
       metadata,
       focusDefects,
       focusCoverage,
@@ -587,11 +528,7 @@ const topLossRecommendation = useMemo(() => {
   const exportPDF = () => {
     const doc = new jsPDF()
     doc.text("QC — Pareto Report", 14, 14)
-    doc.text(`Product: ${product || "-"}`, 14, 22)
     doc.text(`Date: ${date || "-"}`, 14, 30)
-    doc.text(`Operator: ${operator || "-"}`, 14, 38)
-    doc.text(`Shift: ${shift || "-"}`, 80, 38)
-    doc.text(`Line: ${line || "-"}`, 140, 38)
 
     Object.keys(metadata).forEach((k, i) => {
       const y = 46 + i * 8
@@ -606,9 +543,6 @@ const topLossRecommendation = useMemo(() => {
         r.count || 0,
         normalizationMode === "none" ? `${r.percentage}%` : `${r.percentage}`,
         r.cumulativePercentage + "%",
-        r.operator || "",
-        r.shift || "",
-        r.line || "",
         r.date || "",
       ]),
     })
@@ -624,22 +558,19 @@ const topLossRecommendation = useMemo(() => {
   const getShareLink = () => {
     const snapshot: ParetoSnapshot = {
       items,
-      operator,
-      shift,
-      line,
-      product,
       date,
       normalizationMode,
       customNormalizationBase,
       smallGroupThreshold,
       selectedSource,
-      customFields,
       metadata,
     }
     const json = JSON.stringify(snapshot)
     const base64 = btoa(json)
     return `${window.location.origin}${window.location.pathname}?p=${base64}`
   }
+
+   //  7) IMPORT (CSV / EXCEL)
 
   const importFromCSV = (file: File) => {
     Papa.parse(file, {
@@ -694,6 +625,8 @@ const topLossRecommendation = useMemo(() => {
     reader.readAsArrayBuffer(file)
   }
 
+  //   8) RETURN BINDINGS UNTUK UI
+
   return {
     chartRef,
     items,
@@ -702,14 +635,6 @@ const topLossRecommendation = useMemo(() => {
     setCategory,
     count,
     setCount,
-    operator,
-    setOperator,
-    shift,
-    setShift,
-    line,
-    setLine,
-    product,
-    setProduct,
     date,
     setDate,
     normalizationMode,
@@ -755,14 +680,8 @@ const topLossRecommendation = useMemo(() => {
     getShareLink,
     importFromCSV,
     importFromExcel,
-topLossRecommendation,
-    customFields,
-    setCustomFields,
-    newField,
-    setNewField,
+    topLossRecommendation,
     metadata,
     setMetadata,
-    addField,
-    removeField,
   }
 }
