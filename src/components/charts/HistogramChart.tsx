@@ -96,16 +96,16 @@ const HistogramChart = forwardRef<any, Props>(({
 
       ...(normalCurve && normalCurve.length
         ? [
-            {
-              name: "Normal Curve",
-              type: "line",
-              smooth: true,
-              showSymbol: false,
-              yAxisIndex: 0,
-              lineStyle: { width: 2, color: "#D32F2F" },
-              data: normalCurve.map(p => [p.x, p.y])
-            }
-          ]
+          {
+            name: "Normal Curve",
+            type: "line",
+            smooth: true,
+            showSymbol: false,
+            yAxisIndex: 0,
+            lineStyle: { width: 2, color: "#D32F2F" },
+            data: normalCurve.map(p => [p.x, p.y])
+          }
+        ]
         : [])
     ]
   }

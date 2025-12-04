@@ -244,78 +244,7 @@ const ParetoPage = () => {
         </button>
       </div>
 
-
-
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
-          <div className="font-medium text-sm">Informasi Produksi</div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              value={l.product}
-              onChange={e => {
-                l.setProduct(e.target.value)
-                l.setMetadata({ ...l.metadata, product: e.target.value })
-              }}
-              placeholder="Product"
-              className="h-[36px] bg-bg border border-border rounded px-2"
-            />
-
-            <input
-              type="date"
-              value={l.date}
-              onChange={e => {
-                l.setDate(e.target.value)
-                l.setMetadata({ ...l.metadata, date: e.target.value })
-              }}
-              className="h-[36px] bg-bg border border-border rounded px-2"
-            />
-          </div>
-
-          {/* CUSTOM FIELDS IKUT GRID PERSIS SEPERTI CONTOH LAMA */}
-          <div className="grid grid-cols-2 gap-2">
-            {l.customFields
-              .filter(f => f.toLowerCase() !== "product" && f.toLowerCase() !== "date")
-              .map(f => (
-                <div key={f} className="flex items-center gap-1">
-                  <input
-                    className="h-[36px] bg-bg border border-border rounded px-2 w-full"
-                    value={l.metadata[f] ?? ""}
-                    placeholder={f}
-                    onChange={e => l.setMetadata({ ...l.metadata, [f]: e.target.value })}
-                  />
-
-                  <button
-                    onClick={() => l.removeField(f)}
-                    className="text-red-500 text-xs hover:border-red-500 border border-border rounded px-[6px]"
-                  >
-                    X
-                  </button>
-                </div>
-              ))}
-          </div>
-
-          {/* INPUT TAMBAH FIELD */}
-          <div className="flex gap-2 pt-1">
-            <input
-              value={l.newField}
-              onChange={e => l.setNewField(e.target.value)}
-              placeholder="Tambah field custom..."
-              className="h-[36px] bg-bg border border-border rounded px-2 flex-1"
-            />
-
-            <button
-              onClick={l.addField}
-              className="h-[36px] px-3 bg-muted text-foreground rounded border border-border"
-            >
-              +
-            </button>
-          </div>
-        </div>
-
-
         <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
           <div className="font-medium text-sm">Kategori</div>
 
