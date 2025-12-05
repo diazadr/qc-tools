@@ -77,7 +77,7 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
             {t("nav.home")}
           </Link>
 
-          <Link to="/checksheet/defective-item" className={`flex items-center gap-2 ${isActive("/tools")}`}>
+          <Link to="/checksheet/defective-item" className={`flex items-center gap-2 ${isActive("/checksheet/defective-item")}`}>
             <HiWrenchScrewdriver className="w-4 h-4" />
             {t("nav.tools")}
           </Link>
