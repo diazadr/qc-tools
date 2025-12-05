@@ -590,9 +590,7 @@ export const useHistogramLogic = () => {
 
             // JANGAN ubah selectedSource ketika sudah memilih kategori QC
             // HANYA set manual jika memang user sedang di mode manual
-            if (selectedSource === "manual") {
-                setSelectedSource("manual")
-            }
+setSelectedSource("manual")
         }
 
     }
