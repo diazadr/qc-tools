@@ -491,9 +491,9 @@ const HistogramPage = () => {
           <div className="p-3 rounded-lg bg-card border border-border">
             <div className="text-xs text-secondary">Mode</div>
             <div className="mt-1 text-lg font-medium text-foreground">
-                                {Array.isArray(l.mode)
-  ? l.mode.join(", ")
-  : "-"}
+              {Array.isArray(l.mode)
+                ? l.mode.join(", ")
+                : "-"}
             </div>
           </div>
 
@@ -514,7 +514,7 @@ const HistogramPage = () => {
           </div>
 
           {/* Grouped Stats (jika frequency table) */}
-          {l.items.length > 0 && (
+          {l.inputMode === "grouped" && l.groupedData.length > 0 && (
             <>
               <div className="p-3 rounded-lg bg-card border border-border">
                 <div className="text-xs text-secondary">Mean (Grouped)</div>
@@ -545,6 +545,7 @@ const HistogramPage = () => {
               </div>
             </>
           )}
+
 
         </div>
       </div>
