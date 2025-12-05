@@ -293,17 +293,28 @@ export const useHistogramLogic = () => {
             : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
     }, [sorted])
 
-    const mode = useMemo(() => {
-        const freq: Record<number, number> = {}
-        data.forEach((n: number) => {
-            freq[n] = (freq[n] || 0) + 1
-        })
-        const keys = Object.keys(freq).map(Number) as number[]
-        if (!keys.length) return 0
-        return keys.reduce((a: number, b: number) =>
-            freq[a] > freq[b] ? a : b
-            , keys[0])
-    }, [data])
+const mode = useMemo(() => {
+    if (!data.length) return [];
+
+    const freq: Record<number, number> = {};
+
+    data.forEach((v: number) => {
+        freq[v] = (freq[v] || 0) + 1;
+    });
+
+    const maxFreq = Math.max(...Object.values(freq));
+
+    const modes = Object.keys(freq)
+        .map((v: string) => Number(v))
+        .filter((v: number) => freq[v] === maxFreq)
+        .slice(0, 2);
+
+    return modes;
+}, [data]);
+
+
+
+
 
     const modeCountUnique = useMemo(() => {
         if (!data.length) return true

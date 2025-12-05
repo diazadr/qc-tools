@@ -265,35 +265,35 @@ const HistogramPage = () => {
             )}
 
 
-      <div className="flex items-end gap-2">
-  <label className="flex flex-col text-xs flex-1">
-    Bins
-    <div className="mt-1">
-      <input
-        type="number"
-        value={l.bins}
-        min={1}
-        max={20}
-        onChange={e => l.setBins(Number(e.target.value))}
-        className="h-[36px] w-full bg-bg border border-border rounded px-2"
-      />
-    </div>
-  </label>
+            <div className="flex items-end gap-2">
+              <label className="flex flex-col text-xs flex-1">
+                Bins
+                <div className="mt-1">
+                  <input
+                    type="number"
+                    value={l.bins}
+                    min={1}
+                    max={20}
+                    onChange={e => l.setBins(Number(e.target.value))}
+                    className="h-[36px] w-full bg-bg border border-border rounded px-2"
+                  />
+                </div>
+              </label>
 
-  <button
-    onClick={() => l.setBins(l.freedmanDiaconisBins(l.data))}
-    className="h-[36px] px-3 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
-  >
-    F-D
-  </button>
+              <button
+                onClick={() => l.setBins(l.freedmanDiaconisBins(l.data))}
+                className="h-[36px] px-3 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
+              >
+                F-D
+              </button>
 
-  <button
-    onClick={() => l.setBins(l.sturgesBins(l.data.length))}
-    className="h-[36px] px-3 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
-  >
-    Sturges
-  </button>
-</div>
+              <button
+                onClick={() => l.setBins(l.sturgesBins(l.data.length))}
+                className="h-[36px] px-3 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
+              >
+                Sturges
+              </button>
+            </div>
 
 
             <label className="flex items-center gap-2 text-xs mt-1">
@@ -491,7 +491,9 @@ const HistogramPage = () => {
           <div className="p-3 rounded-lg bg-card border border-border">
             <div className="text-xs text-secondary">Mode</div>
             <div className="mt-1 text-lg font-medium text-foreground">
-              {l.modeCountUnique ? "-" : l.mode}
+                                {Array.isArray(l.mode)
+  ? l.mode.join(", ")
+  : "-"}
             </div>
           </div>
 
