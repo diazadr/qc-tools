@@ -268,10 +268,10 @@ export const useHistogramLogic = () => {
     }, [selectedSource, isURLLoading])
 
 
-const data =
-    selectedSource === "manual"
-        ? (numbersManual ?? [])
-        : autoNumbers
+    const data =
+        selectedSource === "manual"
+            ? (numbersManual ?? [])
+            : autoNumbers
 
 
     // STATISTICS (MEAN, MEDIAN, MODE, RANGE, VARIANCE, STDEV)
@@ -442,8 +442,8 @@ const data =
 
 
     const sturgesBins = (n: number): number => {
-        return Math.max(1, Math.ceil(1 + 3.322 * Math.log10(n)))
-    }
+        return Math.max(1, Math.floor(1 + 3.322 * Math.log10(n)));
+    };
 
     const freedmanDiaconisBins = (arr: number[]) => {
         if (arr.length < 2) return 1
@@ -592,7 +592,7 @@ const data =
 
             // JANGAN ubah selectedSource ketika sudah memilih kategori QC
             // HANYA set manual jika memang user sedang di mode manual
-setSelectedSource("manual")
+            setSelectedSource("manual")
         }
 
     }

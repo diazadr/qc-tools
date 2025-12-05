@@ -265,33 +265,36 @@ const HistogramPage = () => {
             )}
 
 
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
-              <label className="flex flex-col text-xs flex-1">
-                Bins
-                <input
-                  type="number"
-                  value={l.bins}
-                  min={1}
-                  max={20}
-                  onChange={e => l.setBins(Number(e.target.value))}
-                  className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
-                />
-              </label>
+      <div className="flex items-end gap-2">
+  <label className="flex flex-col text-xs flex-1">
+    Bins
+    <div className="mt-1">
+      <input
+        type="number"
+        value={l.bins}
+        min={1}
+        max={20}
+        onChange={e => l.setBins(Number(e.target.value))}
+        className="h-[36px] w-full bg-bg border border-border rounded px-2"
+      />
+    </div>
+  </label>
 
-              <button
-                onClick={() => l.setBins(l.freedmanDiaconisBins(l.data))}
-                className="h-[36px] px-2 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
-              >
-                F-D
-              </button>
+  <button
+    onClick={() => l.setBins(l.freedmanDiaconisBins(l.data))}
+    className="h-[36px] px-3 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
+  >
+    F-D
+  </button>
 
-              <button
-                onClick={() => l.setBins(l.sturgesBins(l.data.length))}
-                className="h-[36px] px-2 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
-              >
-                Sturges
-              </button>
-            </div>
+  <button
+    onClick={() => l.setBins(l.sturgesBins(l.data.length))}
+    className="h-[36px] px-3 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
+  >
+    Sturges
+  </button>
+</div>
+
 
             <label className="flex items-center gap-2 text-xs mt-1">
               <input
