@@ -3,7 +3,6 @@ import {
   HiClipboardDocumentList,
   HiChartBar,
   HiChartPie,
-  HiDocumentText,
 } from "react-icons/hi2";
 
 const ToolsQuickNav = () => {
