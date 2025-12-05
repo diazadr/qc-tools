@@ -286,7 +286,7 @@ const HistogramPage = () => {
               </button>
 
               <button
-                onClick={() => l.setBins(Math.max(1, Math.ceil(1 + Math.log2(l.data.length))))}
+                onClick={() => l.setBins(l.sturgesBins(l.data.length))}
                 className="h-[36px] px-2 border rounded bg-muted whitespace-nowrap cursor-pointer hover:border-primary"
               >
                 Sturges

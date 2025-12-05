@@ -439,9 +439,9 @@ export const useHistogramLogic = () => {
 
 
 
-const sturgesBins = (n: number): number => {
-    return Math.max(1, Math.ceil(1 + 3.322 * Math.log10(n)))
-}
+    const sturgesBins = (n: number): number => {
+        return Math.max(1, Math.ceil(1 + 3.322 * Math.log10(n)))
+    }
 
     const freedmanDiaconisBins = (arr: number[]) => {
         if (arr.length < 2) return 1
@@ -493,18 +493,18 @@ const sturgesBins = (n: number): number => {
 
 
     const addGroupedRow = () => {
-    const L = Number(gLower)
-    const U = Number(gUpper)
-    const F = Number(gFreq)
+        const L = Number(gLower)
+        const U = Number(gUpper)
+        const F = Number(gFreq)
 
-    if (!isFinite(L) || !isFinite(U) || !isFinite(F)) return
-    if (U <= L) return
+        if (!isFinite(L) || !isFinite(U) || !isFinite(F)) return
+        if (U <= L) return
 
-    setGroupedData([...groupedData, { lower: L, upper: U, freq: F }])
-    setGLower("")
-    setGUpper("")
-    setGFreq("")
-}
+        setGroupedData([...groupedData, { lower: L, upper: U, freq: F }])
+        setGLower("")
+        setGUpper("")
+        setGFreq("")
+    }
 
 
     // GROUPED STATS
@@ -919,6 +919,7 @@ const sturgesBins = (n: number): number => {
         stddev,
         cp,
         cpk,
+        sturgesBins,
         freedmanDiaconisBins,
         meanGrouped,
         stddevGrouped,
@@ -934,7 +935,7 @@ const sturgesBins = (n: number): number => {
         setGLower, setGUpper, setGFreq,
         setCategoryList,
 
-setGroupedData,
+        setGroupedData,
 
 
         showMeanLine,
