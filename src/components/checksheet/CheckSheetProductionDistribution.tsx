@@ -39,9 +39,9 @@ const CheckSheetDistribution = () => {
   return (
     <div className="text-[14px] space-y-4 select-none">
 
-      <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 px-3 py-2 border border-border rounded bg-card shadow-sm">
         <div className="font-semibold">Distribution Check Sheet</div>
-        <div className="flex items-center gap-2">
+       <div className="flex flex-wrap gap-2 w-full sm:w-auto">
 
           <button
             onClick={() => navigator.clipboard.writeText(l.getShareLink())}
@@ -435,7 +435,7 @@ const CheckSheetDistribution = () => {
 
       <div className="p-3 border border-border rounded bg-card shadow-sm">
         <div className="font-medium text-sm mb-2">Adjust Count</div>
-        <div className="flex gap-2 justify-between">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
           <div className="flex gap-2">
             <button
               disabled={l.selectedDev === null || l.locked}
@@ -481,7 +481,7 @@ const CheckSheetDistribution = () => {
                 }`}
             >Reset</button>
           </div>
-          <div className="flex gap-2">
+         <div className="flex flex-wrap gap-2 sm:justify-end">
             <button
               disabled={l.locked}
               onClick={l.clearAll}

@@ -1,4 +1,4 @@
-import { forwardRef } from "react"
+import { forwardRef, useRef, useImperativeHandle } from "react"
 import ReactECharts from "echarts-for-react"
 
 interface HistogramRow {
@@ -36,6 +36,18 @@ const HistogramChart = forwardRef<any, Props>(
     },
     ref
   ) => {
+const chartInstanceRef = useRef<any>(null)
+
+useImperativeHandle(ref, () => ({
+  getImageDataUrl: () => {
+    if (!chartInstanceRef.current) return null
+    return chartInstanceRef.current.getEchartsInstance().getDataURL({
+      type: "png",
+      pixelRatio: 2,
+      backgroundColor: "#ffffff"
+    })
+  }
+}))
 
     if (!data || data.length === 0)
       return <div className="text-secondary">No data.</div>
@@ -186,7 +198,14 @@ const HistogramChart = forwardRef<any, Props>(
       series
     }
 
-    return <ReactECharts ref={ref} option={option} style={{ height }} />
+   return (
+  <ReactECharts
+    ref={chartInstanceRef}
+    option={option}
+    style={{ height }}
+  />
+)
+
   }
 )
 

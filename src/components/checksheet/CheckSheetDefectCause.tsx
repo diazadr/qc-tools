@@ -10,10 +10,10 @@ const CheckSheetDefectCause = () => {
   return (
     <div className="text-[14px] space-y-4 select-none">
 
-      <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 px-3 py-2 border border-border rounded bg-card shadow-sm">
 
         <div className="font-semibold">Defect Cause Check Sheet</div>
-        <div className="flex items-center gap-2">
+       <div className="flex flex-wrap items-center gap-2">
 
           <button
             onClick={() => navigator.clipboard.writeText(l.getShareLink())}
@@ -68,7 +68,7 @@ const CheckSheetDefectCause = () => {
         <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
           <div className="font-medium text-sm">Informasi Produksi</div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {l.customFields.map(f => (
               <div key={f} className="flex items-center gap-1">
                 <input
@@ -120,7 +120,7 @@ const CheckSheetDefectCause = () => {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               disabled={l.isLocked}
               className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 flex-1 ${l.isLocked ? "cursor-not-allowed" : "cursor-text"
@@ -171,7 +171,8 @@ const CheckSheetDefectCause = () => {
 {l.activeTabWD === "worker" && (
   <>
     {/* INPUT TAMBAH WORKER - sekarang di atas */}
-    <div className="flex gap-2">
+   <div className="flex flex-col sm:flex-row gap-2">
+
       <input
         disabled={l.isLocked}
         className="h-[32px] bg-bg border-[0.5px] border-border rounded px-2 flex-1"
@@ -226,7 +227,8 @@ const CheckSheetDefectCause = () => {
     {l.activeTabWD === "defect" && (
   <>
     {/* INPUT TAMBAH SYMBOL → di atas */}
-    <div className="flex gap-2">
+    <div className="flex flex-col sm:flex-row gap-2">
+
       <input
         disabled={l.isLocked}
         className="h-[32px] bg-bg border-[0.5px] border-border rounded px-2 flex-1"
@@ -276,7 +278,7 @@ const CheckSheetDefectCause = () => {
 
       <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
         <div className="overflow-auto max-h-[480px] scroll-m-0">
-          <table className="w-full text-sm border-separate border-spacing-0 border border-border">
+          <table className="w-full min-w-[800px] text-sm border-separate border-spacing-0 border border-border">
             <thead className="bg-primary text-white sticky top-0 z-10">
               <tr>
                 <th className="px-3 py-2 text-left border border-primary">Worker</th>
@@ -449,7 +451,7 @@ const CheckSheetDefectCause = () => {
     Keterangan Tabel
   </div>
 
-  <table className="w-full text-sm border border-border rounded overflow-hidden">
+<table className="w-full min-w-[500px] text-sm border border-border rounded overflow-hidden">
     <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
 
       <tr className="border-b border-border">
@@ -525,8 +527,9 @@ const CheckSheetDefectCause = () => {
           <span className="px-2 py-[2px] border border-border rounded bg-bg text-xs">{l.selectedType || "-"}</span>
         </div>
 
-        <div className="flex gap-2 justify-between">
-          <div className="flex gap-2">
+       <div className="flex flex-col sm:flex-row gap-3 justify-between">
+          <div className="flex flex-col sm:flex-row gap-2">
+
             <button
               disabled={!l.selectedWorker || !l.selectedDay || !l.selectedShift || !l.selectedType}
               onClick={l.decrement}
@@ -595,7 +598,8 @@ const CheckSheetDefectCause = () => {
             </button>
           </div>
 
-          <div className="flex gap-2">
+         <div className="flex flex-col sm:flex-row gap-2">
+
             <button
               disabled={l.isLocked}
               onClick={l.clearAll}

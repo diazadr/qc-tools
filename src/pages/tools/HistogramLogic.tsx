@@ -4,6 +4,7 @@ import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import Papa from "papaparse"
 import { useChecksheetStore } from "../../store/useChecksheetStore"
+import ExcelJS from "exceljs";
 
 // TYPES
 
@@ -35,7 +36,12 @@ interface HistogramSnapshot {
     }
     date?: string
 }
-
+// DATA KELOMPOK
+interface GroupedRow {
+    lower: number
+    upper: number
+    freq: number
+}
 // MAIN HOOK
 
 export const useHistogramLogic = () => {
@@ -57,36 +63,72 @@ export const useHistogramLogic = () => {
     const [categoryList, setCategoryList] = useState<string[]>([])
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
     const [showComparisonLine, setShowComparisonLine] = useState(false)
+    const [isURLLoading, setIsURLLoading] = useState(true)
+    // MODE INPUT: single / grouped
+    const [inputMode, setInputMode] = useState<"single" | "grouped">("single")
 
+    const [groupedData, setGroupedData] = useState<GroupedRow[]>([])
+
+    // field input sementara
+    const [gLower, setGLower] = useState("")
+    const [gUpper, setGUpper] = useState("")
+    const [gFreq, setGFreq] = useState("")
 
     // SNAPSHOT LOADING
 
     useEffect(() => {
         try {
-            const params = new URLSearchParams(window.location.search)
-            const encoded = params.get("p")
-            if (encoded) {
-                const decoded = JSON.parse(atob(encoded)) as Partial<HistogramSnapshot>
-                if (decoded.items) setItems(decoded.items)
-                if (decoded.bins) setBins(decoded.bins)
-                if (decoded.manualData) setNumbersManual(decoded.manualData)
-                if (decoded.selectedSource) setSelectedSource(decoded.selectedSource)
-                return
-            }
-        } catch { }
+            const params = new URLSearchParams(window.location.search);
+            const encoded = params.get("p");
 
-        const snap = store.getSnapshot("histogram")
-        if (snap?.data) {
-            const d = snap.data
-            if (d.items) setItems(d.items)
-            if (d.bins) setBins(d.bins)
-            if (d.manualData) setNumbersManual(d.manualData)
-            if (d.selectedSource) setSelectedSource(d.selectedSource)
-            if (d.metadata) setMetadata(d.metadata)
-            return
+            if (encoded) {
+                try {
+                    const decoded = JSON.parse(atob(encoded));
+
+                    if (decoded.items) setItems(decoded.items);
+                    if (decoded.bins) setBins(decoded.bins);
+                    if (decoded.manualData) setNumbersManual(decoded.manualData);
+                    if (decoded.selectedSource) setSelectedSource(decoded.selectedSource);
+                    if (decoded.metadata) setMetadata(decoded.metadata);
+                    if (decoded.selectedCategory) setSelectedCategory(decoded.selectedCategory);
+                    if (decoded.inputData) setInputData(decoded.inputData);
+                    if (typeof decoded.showNormalCurve === "boolean") setShowNormalCurve(decoded.showNormalCurve);
+                    if (typeof decoded.showMeanLine === "boolean") setShowMeanLine(decoded.showMeanLine);
+                    if (typeof decoded.showComparisonLine === "boolean") setShowComparisonLine(decoded.showComparisonLine);
+                } catch (e) {
+                    console.warn("Failed to parse sharelink payload", e);
+                } finally {
+                    setIsURLLoading(false);
+                }
+                return;
+            }
+        } catch (e) {
+            console.warn("Error reading URL param p", e);
         }
-        setSelectedSource("manual")
-    }, [])
+
+        // not loaded from URL: try load from persisted snapshot store
+        try {
+            const snap = store.getSnapshot("histogram");
+            if (snap?.data) {
+                const d = snap.data;
+                if (d.items) setItems(d.items);
+                if (d.bins) setBins(d.bins);
+                if (d.manualData) setNumbersManual(d.manualData);
+                if (d.selectedSource) setSelectedSource(d.selectedSource);
+                if (d.metadata) setMetadata(d.metadata);
+                // done loading from store
+                setIsURLLoading(false);
+                return;
+            }
+        } catch (e) {
+            console.warn("Failed to load snapshot from store", e);
+        }
+
+        // fallback: no URL, no store snapshot
+        setSelectedSource("manual");
+        setIsURLLoading(false);
+    }, []);
+
 
     // SNAPSHOT SAVE
 
@@ -138,12 +180,8 @@ export const useHistogramLogic = () => {
         }
 
         return []
-    }, [
-        store.snapshots["production-distribution"],
-        store.snapshots["defective-item"],
-        store.snapshots["defect-location"],
-        store.snapshots["defect-cause"],
-    ])
+    }, [JSON.stringify(store.snapshots)])
+
 
     // Reload jika ganti source
     const reloadFromSource = () => {
@@ -225,11 +263,14 @@ export const useHistogramLogic = () => {
     }
 
 
-    useEffect(() => reloadFromSource(), [selectedSource])
+    useEffect(() => {
+        if (!isURLLoading) reloadFromSource()
+    }, [selectedSource, isURLLoading])
 
-const data = (numbersManual && numbersManual.length > 0)
-  ? numbersManual
-  : autoNumbers
+
+    const data = (numbersManual && numbersManual.length > 0)
+        ? numbersManual
+        : autoNumbers
 
     // STATISTICS (MEAN, MEDIAN, MODE, RANGE, VARIANCE, STDEV)
 
@@ -335,6 +376,18 @@ const data = (numbersManual && numbersManual.length > 0)
 
     const histogramBase = useMemo(() => {
 
+        // MODE GROUPED
+        if (inputMode === "grouped" && groupedData.length > 0) {
+            return groupedData.map(g => ({
+                label: `${g.lower} – ${g.upper}`,
+                count: g.freq,
+                lower: g.lower,
+                upper: g.upper,
+                midpoint: (g.lower + g.upper) / 2
+            }))
+        }
+
+        // MODE DATA TUNGGAL (AUTO BIN)
         const book = computeBookStyleBins(data, bins)
         return book.map(b => ({
             label: `${b.lower.toFixed(4)} – ${b.upper.toFixed(4)}`,
@@ -343,7 +396,9 @@ const data = (numbersManual && numbersManual.length > 0)
             upper: b.upper,
             midpoint: b.midpoint,
         }))
-    }, [data, bins])
+
+    }, [data, bins, inputMode, groupedData])
+
 
     const comparisonLine = useMemo(() => {
         return histogramBase
@@ -384,9 +439,9 @@ const data = (numbersManual && numbersManual.length > 0)
 
 
 
-    const sturgesBins = (n: number): number => {
-        return Math.max(1, Math.ceil(1 + Math.log2(n)))
-    }
+const sturgesBins = (n: number): number => {
+    return Math.max(1, Math.ceil(1 + 3.322 * Math.log10(n)))
+}
 
     const freedmanDiaconisBins = (arr: number[]) => {
         if (arr.length < 2) return 1
@@ -435,6 +490,22 @@ const data = (numbersManual && numbersManual.length > 0)
         const pct = ((max.count / totalCount) * 100).toFixed(1)
         return `Kategori terbesar: ${max.category} (${pct}%)`
     }, [tableRows, totalCount])
+
+
+    const addGroupedRow = () => {
+    const L = Number(gLower)
+    const U = Number(gUpper)
+    const F = Number(gFreq)
+
+    if (!isFinite(L) || !isFinite(U) || !isFinite(F)) return
+    if (U <= L) return
+
+    setGroupedData([...groupedData, { lower: L, upper: U, freq: F }])
+    setGLower("")
+    setGUpper("")
+    setGFreq("")
+}
+
 
     // GROUPED STATS
 
@@ -635,19 +706,57 @@ const data = (numbersManual && numbersManual.length > 0)
         a.click()
     }
 
-    const exportExcel = () => {
-        const dataForSheet = tableRows.map(r => ({
-            Category: r.category,
-            Count: r.count,
-            Value: `${r.percentage}%`,
-            Date: r.date,
-        }))
+    const exportExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet("Histogram");
 
-        const sheet = XLSX.utils.json_to_sheet(dataForSheet)
-        const wb = XLSX.utils.book_new()
-        XLSX.utils.book_append_sheet(wb, sheet, "Histogram")
-        XLSX.writeFile(wb, "histogram.xlsx")
-    }
+        sheet.addRow(["QC — Histogram Report"]);
+        sheet.mergeCells("A1:D1");
+        sheet.getCell("A1").font = { bold: true, size: 16 };
+
+        sheet.addRow(["Generated:", new Date().toLocaleString()]);
+        sheet.addRow([]);
+
+        sheet.addRow(["Bin", "Count", "Persen", "Tanggal"]);
+
+        tableRows.forEach(r => {
+            sheet.addRow([
+                r.category,
+                r.count,
+                `${r.percentage}%`,
+                r.date
+            ]);
+        });
+
+        let img = null;
+
+        if (chartRef.current) {
+            const png = chartRef.current.getImageDataUrl?.();
+            if (png) {
+                img = workbook.addImage({
+                    base64: png,
+                    extension: "png"
+                });
+
+                sheet.addImage(img, {
+                    tl: { col: 6, row: 1 },
+                    ext: { width: 500, height: 300 }
+                });
+            }
+        }
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "histogram.xlsx";
+        a.click();
+    };
+
 
     const exportJSON = () => {
         const payload = {
@@ -671,23 +780,68 @@ const data = (numbersManual && numbersManual.length > 0)
     }
 
     const exportPDF = () => {
-        const doc = new jsPDF()
-        doc.text("QC — Histogram Report", 14, 16)
+        const doc = new jsPDF("p", "mm", "a4");
+
+        doc.setFillColor(30, 87, 153);
+        doc.rect(0, 0, 999, 22, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(15);
+        doc.text("Histogram Report", 14, 14);
+        doc.setTextColor(0, 0, 0);
+
+        let y = 30;
+
+        if (chartRef.current) {
+            const img = chartRef.current.getImageDataUrl?.();
+            if (img) {
+                const pageWidth = doc.internal.pageSize.getWidth() - 20;
+                const height = 70;
+                doc.addImage(img, "PNG", 10, y, pageWidth, height);
+                y += height + 10;
+            }
+        }
 
         autoTable(doc, {
-            startY: 50,
-            head: [["Kategori/Bin", "Jumlah", "Nilai"]],
-            body: tableRows.map(r => [r.category, r.count, `${r.percentage}%`]),
-        })
+            startY: y,
+            head: [["Kategori/Bin", "Jumlah", "Persen"]],
+            body: tableRows.map(r => [
+                r.category,
+                r.count,
+                `${r.percentage}%`
+            ]),
+            headStyles: { fillColor: [30, 87, 153], textColor: 255 },
+            alternateRowStyles: { fillColor: [245, 245, 245] },
+            styles: { fontSize: 9 },
+            margin: { left: 14, right: 14 }
+        });
 
-        const y = (doc as any).lastAutoTable.finalY + 10
-        doc.text("Ringkasan:", 12, y)
-        doc.text(summary || "-", 12, y + 8)
-        doc.text("Detail:", 12, y + 16)
-        doc.text(summaryDetailText || "-", 12, y + 24)
+        let fy = (doc).lastAutoTable.finalY + 10;
 
-        doc.save("histogram.pdf")
+        doc.setFontSize(12);
+        doc.text("Ringkasan:", 14, fy);
+        fy += 6;
+
+        doc.setFontSize(10);
+        doc.text(summary || "-", 14, fy);
+        fy += 10;
+
+        doc.setFontSize(12);
+        doc.text("Detail:", 14, fy);
+        fy += 6;
+
+        doc.setFontSize(10);
+        doc.text(doc.splitTextToSize(summaryDetailText || "-", 180), 14, fy);
+
+        const p = doc.getNumberOfPages();
+        const genDate = new Date().toLocaleString();
+        doc.setFontSize(9);
+        doc.setTextColor(120);
+        doc.text(`Generated: ${genDate}`, 14, 289);
+        doc.text(`Page ${p}`, 200, 289, { align: "right" });
+
+        doc.save("histogram.pdf");
     }
+
 
     const exportChartImage = () => {
         if (!chartRef.current) return
@@ -700,17 +854,24 @@ const data = (numbersManual && numbersManual.length > 0)
     }
 
     const getShareLink = () => {
-        const snapshot: HistogramSnapshot = {
+        const snapshot = {
             items,
             bins,
-            metadata,
             manualData: numbersManual,
             selectedSource,
-            date: new Date().toLocaleString(),
-        }
-        const json = JSON.stringify(snapshot)
-        return `${window.location.origin}${window.location.pathname}?p=${btoa(json)}`
-    }
+            metadata,
+            selectedCategory,
+            inputData,
+            showNormalCurve,
+            showMeanLine,
+            showComparisonLine,
+            date: new Date().toLocaleString()
+        };
+
+        const encoded = btoa(JSON.stringify(snapshot));
+        return `${window.location.origin}${window.location.pathname}?p=${encoded}`;
+    };
+
 
     // RETURN API
 
@@ -765,6 +926,15 @@ const data = (numbersManual && numbersManual.length > 0)
         modeGrouped,
         histogramShape,
         comparisonLine,
+        addGroupedRow,
+        inputMode,
+        setInputMode,
+        groupedData,
+        gLower, gUpper, gFreq,
+        setGLower, setGUpper, setGFreq,
+        setCategoryList,
+
+setGroupedData,
 
 
         showMeanLine,

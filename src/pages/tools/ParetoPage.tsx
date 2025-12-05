@@ -28,9 +28,9 @@ const ParetoPage = () => {
   return (
     <div className="text-[14px] space-y-4 select-none">
       <ToolsQuickNav />
-      <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 px-3 py-2 border border-border rounded bg-card shadow-sm">
         <div className="font-semibold">Pareto Chart</div>
-        <div className="flex items-center gap-2">
+       <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => navigator.clipboard.writeText(l.getShareLink())}
             className="h-[32px] px-3 flex items-center gap-2 bg-primary text-white rounded border cursor-pointer hover:bg-primary/80"
@@ -143,7 +143,8 @@ const ParetoPage = () => {
 
                 {showTopNExport && (
                   <div className="px-3 py-2 border-t border-border">
-                    <div className="flex items-center gap-2">
+                   <div className="flex flex-wrap items-center gap-2">
+
                       <button onClick={() => { l.exportTopNToCSV(3); setShowExport(false); setShowTopNExport(false) }} className="qc-btn px-3 py-1">Top 3</button>
                       <button onClick={() => { l.exportTopNToCSV(5); setShowExport(false); setShowTopNExport(false) }} className="qc-btn px-3 py-1">Top 5</button>
                       <button onClick={() => { l.exportTopNToCSV(10); setShowExport(false); setShowTopNExport(false) }} className="qc-btn px-3 py-1">Top 10</button>
@@ -161,7 +162,7 @@ const ParetoPage = () => {
 <div className="p-3 border border-border rounded bg-card shadow-sm space-y-4">
   <div className="font-medium text-sm">Konfigurasi Pareto</div>
 
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
     <div className="space-y-3">
       <div className="flex items-end gap-2">
@@ -277,7 +278,7 @@ const ParetoPage = () => {
         <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
           <div className="font-medium text-sm">Kategori</div>
 
-          <div className="flex gap-2 items-center">
+          <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
             <input
               className="h-[32px] bg-bg border border-border rounded px-2 flex-1"
               value={l.category}
@@ -329,7 +330,7 @@ const ParetoPage = () => {
       <div className="qc-card mb-6 overflow-x-auto p-3">
         <h2 className="text-lg font-semibold text-text mb-4">Data Pareto</h2>
 
-        <table className="text-sm w-full border-collapse">
+       <table className="text-sm w-full min-w-[650px] border-collapse">
           <thead>
             <tr className="border-border border-b text-secondary">
               <th className="text-left py-2">No</th>

@@ -22,10 +22,10 @@ const HistogramPage = () => {
   return (
     <div className="text-[14px] space-y-4 select-none">
       <ToolsQuickNav />
-      <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 px-3 py-2 border border-border rounded bg-card shadow-sm">
         <div className="font-semibold">Histogram</div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => navigator.clipboard.writeText(l.getShareLink())}
             className="h-[32px] px-3 flex items-center gap-2 bg-primary text-white rounded border hover:bg-primary/80 cursor-pointer"
@@ -119,14 +119,94 @@ const HistogramPage = () => {
           <div className="font-medium text-sm">Konfigurasi Histogram</div>
 
           <div className="space-y-3">
+            {/* MODE INPUT */}
+            <label className="flex flex-col text-xs mt-1">
+              Mode Input
+              <select
+                value={l.inputMode}
+                onChange={e => {
+                  const mode = e.target.value as "single" | "grouped"
+
+                  l.setInputMode(mode)
+
+                  if (mode === "grouped") {
+                    l.setSelectedSource("manual")
+                    l.setCategoryList([])
+                    l.setSelectedCategory(null)
+                    l.setInputData("")
+                  }
+
+                  if (mode === "single") {
+                    l.setGroupedData([])
+                  }
+                }}
+
+                className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+              >
+                <option value="single">Data Tunggal</option>
+                <option value="grouped">Data Kelompok (Interval + Frekuensi)</option>
+              </select>
+            </label>
+
+            {/* INPUT DATA KELOMPOK */}
+            {l.inputMode === "grouped" && (
+              <div className="space-y-2 border border-border rounded p-2 bg-muted/10 mt-2">
+
+                <div className="grid grid-cols-3 gap-2">
+                  <input
+                    type="number"
+                    placeholder="Lower"
+                    className="h-[32px] bg-bg border border-border rounded px-2"
+                    value={l.gLower}
+                    onChange={e => l.setGLower(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Upper"
+                    className="h-[32px] bg-bg border border-border rounded px-2"
+                    value={l.gUpper}
+                    onChange={e => l.setGUpper(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Freq"
+                    className="h-[32px] bg-bg border border-border rounded px-2"
+                    value={l.gFreq}
+                    onChange={e => l.setGFreq(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  onClick={l.addGroupedRow}
+                  className="h-[32px] w-full bg-primary text-white rounded border cursor-pointer"
+                >
+                  Tambahkan Interval
+                </button>
+
+                <table className="w-full text-xs border border-border mt-2">
+                  <tbody>
+                    {l.groupedData.map((g, i) => (
+                      <tr key={i}>
+                        <td className="border px-2 py-1">{g.lower}</td>
+                        <td className="border px-2 py-1">{g.upper}</td>
+                        <td className="border px-2 py-1">{g.freq}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+              </div>
+            )}
 
             <div className="flex items-end justify-between">
               <label className="flex flex-col text-xs flex-1">
                 Data Source
                 <select
+                  disabled={l.inputMode === "grouped"}
                   value={l.selectedSource}
                   onChange={e => l.setSelectedSource(e.target.value as any)}
-                  className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+                  className={`h-[36px] bg-bg border border-border rounded px-2 mt-1
+    ${l.inputMode === "grouped" ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <option value="manual">Manual Input</option>
                   <option value="production-distribution">Production Distribution</option>
@@ -149,9 +229,11 @@ const HistogramPage = () => {
               <label className="flex flex-col text-xs mt-1">
                 Pilih Kategori
                 <select
+                  disabled={l.inputMode === "grouped"}
                   value={l.selectedCategory ?? ""}
                   onChange={e => l.loadSelectedCategory(e.target.value)}
-                  className="h-[36px] bg-bg border border-border rounded px-2 mt-1"
+                  className={`h-[36px] bg-bg border border-border rounded px-2 mt-1
+    ${l.inputMode === "grouped" ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <option value="">-- Pilih kategori --</option>
                   {l.categoryList.map(cat => (
@@ -183,7 +265,7 @@ const HistogramPage = () => {
             )}
 
 
-            <div className="flex items-end gap-2">
+            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
               <label className="flex flex-col text-xs flex-1">
                 Bins
                 <input
@@ -293,7 +375,7 @@ const HistogramPage = () => {
 
       </div>
 
-      {!l.selectedCategory && (
+      {l.inputMode === "single" && !l.selectedCategory && (
         <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
           <div className="font-medium text-sm">Input Data Manual</div>
 
@@ -316,7 +398,7 @@ const HistogramPage = () => {
 
       <div className="qc-card mb-6 overflow-x-auto p-3">
         <h2 className="text-lg font-semibold mb-4">Data Histogram</h2>
-        <table className="w-full text-sm border border-border border-collapse">
+        <table className="w-full min-w-[500px] text-sm border border-border border-collapse">
           <thead>
             <tr className="bg-muted/30 text-secondary">
               <th className="py-2 px-2 text-center w-[40px]">No</th>
@@ -355,23 +437,23 @@ const HistogramPage = () => {
       <div className="qc-card mb-6">
         <h2 className="text-lg font-semibold mb-4">Histogram Chart</h2>
 
-<HistogramChart
-  ref={l.chartRef}
-  data={l.histogramBase.map(b => ({
-    category: b.label,
-    count: b.count,
-    lower: b.lower,
-    upper: b.upper,
-    midpoint: b.midpoint
-  }))}
-mode="measurement"
-  normalCurve={l.normalCurvePoints}
-  comparisonLine={l.comparisonLine}
-  showComparisonLine={l.showComparisonLine}
-  height={350}
-  meanValue={l.mean}
-  showMean={l.showMeanLine}
-/>
+        <HistogramChart
+          ref={l.chartRef}
+          data={l.histogramBase.map(b => ({
+            category: b.label,
+            count: b.count,
+            lower: b.lower,
+            upper: b.upper,
+            midpoint: b.midpoint
+          }))}
+          mode="measurement"
+          normalCurve={l.normalCurvePoints}
+          comparisonLine={l.comparisonLine}
+          showComparisonLine={l.showComparisonLine}
+          height={350}
+          meanValue={l.mean}
+          showMean={l.showMeanLine}
+        />
 
 
       </div>
@@ -384,7 +466,7 @@ mode="measurement"
           <div className="text-xs text-secondary">Updated: {new Date().toLocaleString()}</div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
 
           {/* Mean */}
           <div className="p-3 rounded-lg bg-card border border-border">
@@ -571,10 +653,64 @@ mode="measurement"
         </div>
       </div>
 
-      <div className="p-3 rounded-lg bg-gradient-to-tr from-white to-slate-50 border border-border">
-        <div className="text-xs text-secondary">Tipe Histogram</div>
-        <div className="mt-1 text-lg font-medium">{l.histogramShape}</div>
+      <div className="p-4 border border-primary rounded bg-primary/5 shadow-md space-y-4 text-sm">
+        <div className="text-[15px] font-bold text-primary uppercase tracking-wide">
+          Tipe Histogram
+        </div>
+
+        {l.histogramBase.length === 0 ? (
+          <div className="text-sm text-secondary italic">
+            Masukkan data terlebih dahulu untuk melihat bentuk histogram.
+          </div>
+        ) : (
+          <div className="space-y-4 text-sm">
+
+            {/* Bentuk distribusi */}
+            <div className="p-3 border-l-4 border-primary bg-primary/10 rounded">
+              <div className="text-[13px] font-semibold text-primary">
+                Bentuk Distribusi
+              </div>
+              <div className="text-[13px] font-medium">
+                {l.histogramShape || "-"}
+              </div>
+            </div>
+
+            {/* Informasi tambahan — contoh analisis sederhana */}
+            <div className="p-3 border-l-4 border-success bg-success/10 rounded">
+              <div className="text-[13px] font-semibold text-success">
+                Kesimpulan Singkat
+              </div>
+
+              {(() => {
+                const shape = l.histogramShape
+
+                if (!shape) return <div className="text-[13px]">-</div>
+
+                if (shape === "Normal")
+                  return <div className="text-[13px] font-medium">Distribusi mendekati normal — proses terlihat stabil.</div>
+
+                if (shape.includes("Skew"))
+                  return (
+                    <div className="text-[13px] font-medium">
+                      Distribusi tidak simetris — terdapat kecenderungan penyimpangan yang perlu dianalisis.
+                    </div>
+                  )
+
+                if (shape === "Twin-peak")
+                  return (
+                    <div className="text-[13px] font-medium">
+                      Pola dua puncak — kemungkinan berasal dari dua sumber proses berbeda.
+                    </div>
+                  )
+
+                return <div className="text-[13px] font-medium">Distribusi umum tanpa pola khusus.</div>
+              })()}
+            </div>
+
+          </div>
+        )}
       </div>
+
 
 
     </div>

@@ -182,7 +182,7 @@ ABC: ${abcClass[bar?.dataIndex] || "-"}
                 show: true,
                 position: "top",
                 formatter: (p: any) => abcClass[p.dataIndex],
-                color: "#FFFFFF",
+                color: "var(--text)",
                 fontSize: 11,
                 fontWeight: 700,
               },

@@ -10,14 +10,14 @@ const CheckSheetDefectLocation = () => {
   return (
     <div className="text-[14px] space-y-4 select-none">
 
-      <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 px-3 py-2 border border-border rounded bg-card shadow-sm">
 
         <div className="font-semibold">Defect Location Check Sheet</div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
 
           <button
             onClick={() => navigator.clipboard.writeText(l.getShareLink())}
-            className="h-[32px] px-3 flex items-center gap-2 bg-primary text-white rounded border cursor-pointer hover:bg-primary/80"
+             className="h-[32px] px-3 flex items-center gap-2 bg-primary text-white rounded border cursor-pointer hover:bg-primary/80"
           >
             <HiShare className="w-4 h-4" />
             <span>Share Link</span>
@@ -83,7 +83,7 @@ const CheckSheetDefectLocation = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
           <div className="font-medium text-sm">Informasi Produksi</div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {l.customFields.map(f => (
               <div key={f} className="flex items-center gap-1">
                 <input
@@ -132,12 +132,9 @@ const CheckSheetDefectLocation = () => {
                 📅
               </span>
             </div>
-
-
-
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               disabled={l.locked}
               className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 flex-1 ${l.locked ? "cursor-not-allowed" : "cursor-text"
@@ -163,8 +160,7 @@ const CheckSheetDefectLocation = () => {
         <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
 
           <div className="font-medium text-sm">Defect Input</div>
-
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <input
               disabled={l.locked}
               value={l.defectType}
@@ -271,8 +267,7 @@ const CheckSheetDefectLocation = () => {
 
       <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
         <div className="overflow-auto max-h-[480px] scroll-m-0">
-          <table className="w-full text-sm border-separate border-spacing-0 border border-border">
-
+          <table className="w-full min-w-[900px] text-sm border-separate border-spacing-0 border border-border">
             <thead className="bg-primary text-white sticky top-0 z-10">
               <tr>
                 <th className="relative w-[80px] h-[50px] border border-primary overflow-hidden text-center">
@@ -291,11 +286,6 @@ const CheckSheetDefectLocation = () => {
                   </span>
 
                 </th>
-
-
-
-
-
                 {l.radial.map(r => (
                   <th
                     key={r}
@@ -392,7 +382,6 @@ const CheckSheetDefectLocation = () => {
                 <td className="px-3 py-2 text-center font-bold font-mono border border-border">{l.totalAll}</td>
               </tr>
             </tfoot>
-
           </table>
         </div>
       </div>
@@ -433,84 +422,87 @@ const CheckSheetDefectLocation = () => {
           </div>
         )}
       </div>
+<div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
+  <div className="font-semibold flex items-center gap-2">
+    Keterangan Tabel (Defect Location)
+  </div>
+
+  <div className="overflow-x-auto w-full">
+    <table className="w-full min-w-[500px] text-sm border border-border rounded overflow-hidden">
+      <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
+
+        <tr className="border-b border-border">
+          <td className="px-2 py-1 w-[140px] flex items-center gap-2">
+            🟩 <b>Circular (baris)</b>
+          </td>
+          <td className="px-2 py-1">
+            Posisi keliling (misalnya sektor A–H)
+          </td>
+        </tr>
+
+        <tr className="border-b border-border">
+          <td className="px-2 py-1 flex items-center gap-2">
+            🟥 <b>Radial (kolom)</b>
+          </td>
+          <td className="px-2 py-1">
+            Posisi arah radius dari pusat ke luar (misalnya 1–10)
+          </td>
+        </tr>
+
+        <tr className="border-b border-border">
+          <td className="px-2 py-1 flex items-center gap-2">
+            🔢 <b>Nilai sel</b>
+          </td>
+          <td className="px-2 py-1">
+            Jumlah defect pada titik lokasi tertentu (Circular & Radial)
+          </td>
+        </tr>
+
+        <tr className="border-b border-border">
+          <td className="px-2 py-1 flex items-center gap-2">
+            🏷️ <b>Jenis Defect</b>
+          </td>
+          <td className="px-2 py-1">
+            Ditampilkan kecil di bawah nilai sel jika jumlah &gt; 0
+          </td>
+        </tr>
+
+        <tr className="border-b border-border">
+          <td className="px-2 py-1 flex items-center gap-2">
+            🔴 <b>Severity</b>
+          </td>
+          <td className="px-2 py-1">
+            Menunjukkan tingkat keparahan (Minor, Major, Critical) dengan warna label
+          </td>
+        </tr>
+
+        <tr className="border-b border-border">
+          <td className="px-2 py-1 flex items-center gap-2">
+            🟦 <b>Cell biru</b>
+          </td>
+          <td className="px-2 py-1">
+            Menandakan sel yang sedang dipilih / difokuskan
+          </td>
+        </tr>
+
+        <tr>
+          <td className="px-2 py-1 flex items-center gap-2">
+            ➕ <b>Total</b>
+          </td>
+          <td className="px-2 py-1">
+            Jumlah keseluruhan defect per Circular maupun total keseluruhan
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
       <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
-        <div className="font-semibold flex items-center gap-2">
-          Keterangan Tabel (Defect Location)
-        </div>
 
-        <table className="w-full text-sm border border-border rounded overflow-hidden">
-          <tbody className="[&_tr:nth-child(even)]:bg-muted/20">
-
-            <tr className="border-b border-border">
-              <td className="px-2 py-1 w-[140px] flex items-center gap-2">
-                🟩 <b>Circular (baris)</b>
-              </td>
-              <td className="px-2 py-1">
-                Posisi keliling (misalnya sektor A–H)
-              </td>
-            </tr>
-
-            <tr className="border-b border-border">
-              <td className="px-2 py-1 flex items-center gap-2">
-                🟥 <b>Radial (kolom)</b>
-              </td>
-              <td className="px-2 py-1">
-                Posisi arah radius dari pusat ke luar (misalnya 1–10)
-              </td>
-            </tr>
-
-            <tr className="border-b border-border">
-              <td className="px-2 py-1 flex items-center gap-2">
-                🔢 <b>Nilai sel</b>
-              </td>
-              <td className="px-2 py-1">
-                Jumlah defect pada titik lokasi tertentu (Circular & Radial)
-              </td>
-            </tr>
-
-            <tr className="border-b border-border">
-              <td className="px-2 py-1 flex items-center gap-2">
-                🏷️ <b>Jenis Defect</b>
-              </td>
-              <td className="px-2 py-1">
-                Ditampilkan kecil di bawah nilai sel jika jumlah &gt; 0
-              </td>
-            </tr>
-
-            <tr className="border-b border-border">
-              <td className="px-2 py-1 flex items-center gap-2">
-                🔴 <b>Severity</b>
-              </td>
-              <td className="px-2 py-1">
-                Menunjukkan tingkat keparahan (Minor, Major, Critical) dengan warna label
-              </td>
-            </tr>
-
-            <tr className="border-b border-border">
-              <td className="px-2 py-1 flex items-center gap-2">
-                🟦 <b>Cell biru</b>
-              </td>
-              <td className="px-2 py-1">
-                Menandakan sel yang sedang dipilih / difokuskan
-              </td>
-            </tr>
-
-            <tr>
-              <td className="px-2 py-1 flex items-center gap-2">
-                ➕ <b>Total</b>
-              </td>
-              <td className="px-2 py-1">
-                Jumlah keseluruhan defect per Circular maupun total keseluruhan
-              </td>
-            </tr>
-
-          </tbody>
-        </table>
-      </div>
-
-      <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
-
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <h4>Kolom Circular</h4>
           <span className="px-3 py-1 border-[0.5px] border-border rounded bg-bg text-xs">
             {l.selectedCirc || "-"}
@@ -521,76 +513,79 @@ const CheckSheetDefectLocation = () => {
           </span>
         </div>
 
-        <div className="flex gap-2 justify-between">
-     <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3 relative">
+        <div className="overflow-x-auto w-full">
+          <div className="flex flex-col sm:flex-row gap-3 justify-between min-w-[650px]">
 
-  <div className="flex gap-2">
-    <button
-      disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
-      onClick={l.decrement}
-      className={`h-[32px] w-[32px] bg-muted rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
-        ? "cursor-not-allowed opacity-50"
-        : "cursor-pointer hover:border-primary"
-        }`}
-    >
-      -
-    </button>
-
-    <button
-      disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
-      onClick={l.increment}
-      className={`h-[32px] w-[32px] bg-muted rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
-        ? "cursor-not-allowed opacity-50"
-        : "cursor-pointer hover:border-primary"
-        }`}
-    >
-      +
-    </button>
-
-    <input
-      type="number"
-      min={0}
-      className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 w-[120px] font-mono ${!l.selectedCirc || !l.selectedRad ? "cursor-not-allowed" : "cursor-text"
-        }`}
-      value={l.manual}
-      onChange={e => l.setManual(Number(e.target.value))}
-      disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
-    />
-
-    <button
-      disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
-      onClick={l.applyManual}
-      className={`h-[32px] px-3 rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
-        ? "cursor-not-allowed opacity-50 bg-primary/40 text-white"
-        : "cursor-pointer bg-primary/80 text-white hover:border-primary"
-        }`}
-    >
-      Set
-    </button>
-
-    <button
-      disabled={!l.selectedCirc}
-      onClick={() => l.setCellValue(l.selectedCirc!, l.selectedRad!, 0)}
-      className={`h-[32px] px-3 rounded border-[0.5px] ${!l.selectedCirc
-        ? "cursor-not-allowed opacity-50 bg-error/40 text-white"
-        : "cursor-pointer bg-error/80 text-white hover:border-error"
-        }`}
-    >
-      Reset
-    </button>
-  </div>
-
-  {!l.defectType && (
-    <div className="absolute bottom-1 left-1 text-error text-xs italic">
-      Isi defect type terlebih dahulu
-    </div>
-  )}
-
-</div>
+            <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3 relative min-w-[280px]">
 
 
+              <div className="flex flex-wrap gap-2 min-w-[200px]">
+                <button
+                  disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+                  onClick={l.decrement}
+                  className={`h-[32px] w-[32px] bg-muted rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
+                    ? "cursor-not-allowed opacity-50"
+                    : "cursor-pointer hover:border-primary"
+                    }`}
+                >
+                  -
+                </button>
 
-          <div className="flex gap-2">
+                <button
+                  disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+                  onClick={l.increment}
+                  className={`h-[32px] w-[32px] bg-muted rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
+                    ? "cursor-not-allowed opacity-50"
+                    : "cursor-pointer hover:border-primary"
+                    }`}
+                >
+                  +
+                </button>
+
+                <input
+                  type="number"
+                  min={0}
+                  className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 w-[120px] font-mono ${!l.selectedCirc || !l.selectedRad ? "cursor-not-allowed" : "cursor-text"
+                    }`}
+                  value={l.manual}
+                  onChange={e => l.setManual(Number(e.target.value))}
+                  disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+                />
+
+                <button
+                  disabled={!l.selectedCirc || !l.selectedRad || !l.defectType}
+                  onClick={l.applyManual}
+                  className={`h-[32px] px-3 rounded border-[0.5px] ${!l.selectedCirc || !l.selectedRad
+                    ? "cursor-not-allowed opacity-50 bg-primary/40 text-white"
+                    : "cursor-pointer bg-primary/80 text-white hover:border-primary"
+                    }`}
+                >
+                  Set
+                </button>
+
+                <button
+                  disabled={!l.selectedCirc}
+                  onClick={() => l.setCellValue(l.selectedCirc!, l.selectedRad!, 0)}
+                  className={`h-[32px] px-3 rounded border-[0.5px] ${!l.selectedCirc
+                    ? "cursor-not-allowed opacity-50 bg-error/40 text-white"
+                    : "cursor-pointer bg-error/80 text-white hover:border-error"
+                    }`}
+                >
+                  Reset
+                </button>
+              </div>
+
+              {!l.defectType && (
+                <div className="absolute bottom-1 left-1 text-error text-xs italic">
+                  Isi defect type terlebih dahulu
+                </div>
+              )}
+
+            </div>
+          </div>
+
+
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => {
                 l.circular.forEach(c => {

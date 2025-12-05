@@ -19,10 +19,10 @@ const CheckSheetDefectiveItem = () => {
     <div ref={exportAreaRef} id="checkshet-export-area">
       <div className="text-[14px] space-y-4 select-none">
 
-        <div className="flex justify-between items-center px-3 py-2 border border-border rounded bg-card shadow-sm">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 px-3 py-2 border border-border rounded bg-card shadow-sm">
 
           <div className="font-semibold">Defective Item Check Sheet</div>
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
 
             <button
               onClick={() => navigator.clipboard.writeText(l.getShareLink())}
@@ -210,7 +210,7 @@ const CheckSheetDefectiveItem = () => {
 
             </div>
 
-            <div className="flex gap-2">
+         <div className="flex flex-wrap gap-2 sm:justify-end">
               <input
                 disabled={l.isLocked}
                 className={`h-[32px] bg-bg border-[0.5px] border-border rounded px-2 flex-1 ${l.isLocked ? "cursor-not-allowed" : "cursor-text"
@@ -642,7 +642,7 @@ const CheckSheetDefectiveItem = () => {
 
         <div className="p-3 border border-border rounded bg-card shadow-sm space-y-3">
 
-          <div className="flex items-center gap-2">
+         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <h4>Kolom Jenis</h4>
             <span className="px-3 py-1 border-[0.5px] border-border rounded bg-bg text-xs">
               {l.selectedCat ? l.categories.find(c => c.id === l.selectedCat)?.name : "-"}
@@ -653,8 +653,8 @@ const CheckSheetDefectiveItem = () => {
             </span>
           </div>
 
-          <div className="flex gap-2 justify-between">
-            <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
+            <div className="flex flex-wrap gap-2 sm:justify-end">
               <button
                 disabled={!l.selectedCat || !l.selectedDay}
                 onClick={l.decrement}
@@ -706,7 +706,7 @@ const CheckSheetDefectiveItem = () => {
               </button>
             </div>
 
-            <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 sm:justify-end">
               <button
                 onClick={l.clearAll}
                 className="h-[32px] px-3 bg-error/60 text-white rounded border-[0.5px] cursor-pointer hover:border-error"
