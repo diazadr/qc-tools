@@ -471,80 +471,79 @@ const HistogramPage = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
 
-          {/* Mean */}
-          <div className="p-3 rounded-lg bg-card border border-border">
-            <div className="text-xs text-secondary">Mean</div>
-            <div className="mt-1 text-lg font-medium text-foreground">
-              {l.mean.toFixed(3)}
-            </div>
-          </div>
-
-          {/* Median */}
-          <div className="p-3 rounded-lg bg-card border border-border">
-            <div className="text-xs text-secondary">Median</div>
-            <div className="mt-1 text-lg font-medium text-foreground">
-              {l.median.toFixed(3)}
-            </div>
-          </div>
-
-          {/* Mode */}
-          <div className="p-3 rounded-lg bg-card border border-border">
-            <div className="text-xs text-secondary">Mode</div>
-            <div className="mt-1 text-lg font-medium text-foreground">
-              {Array.isArray(l.mode)
-                ? l.mode.join(", ")
-                : "-"}
-            </div>
-          </div>
-
-          {/* Std Dev */}
-          <div className="p-3 rounded-lg bg-card border border-border">
-            <div className="text-xs text-secondary">Std Dev</div>
-            <div className="mt-1 text-lg font-medium text-foreground">
-              {l.stddev.toFixed(4)}
-            </div>
-          </div>
-
-          {/* Variance */}
-          <div className="p-3 rounded-lg bg-card border border-border">
-            <div className="text-xs text-secondary">Variance</div>
-            <div className="mt-1 text-lg font-medium text-foreground">
-              {l.variance.toFixed(6)}
-            </div>
-          </div>
-
-          {/* Grouped Stats (jika frequency table) */}
-          {l.inputMode === "grouped" && l.groupedData.length > 0 && (
+          {l.inputMode === "single" && (
             <>
               <div className="p-3 rounded-lg bg-card border border-border">
-                <div className="text-xs text-secondary">Mean (Grouped)</div>
+                <div className="text-xs text-secondary">Mean</div>
                 <div className="mt-1 text-lg font-medium text-foreground">
-                  {l.meanGrouped?.toFixed(3)}
+                  {l.mean.toFixed(3)}
                 </div>
               </div>
 
               <div className="p-3 rounded-lg bg-card border border-border">
-                <div className="text-xs text-secondary">Mode (Grouped)</div>
+                <div className="text-xs text-secondary">Median</div>
                 <div className="mt-1 text-lg font-medium text-foreground">
-                  {l.modeGrouped?.label ?? "-"}
+                  {l.median.toFixed(3)}
                 </div>
               </div>
 
               <div className="p-3 rounded-lg bg-card border border-border">
-                <div className="text-xs text-secondary">Std Dev (Grouped)</div>
+                <div className="text-xs text-secondary">Mode</div>
                 <div className="mt-1 text-lg font-medium text-foreground">
-                  {l.stddevGrouped?.toFixed(3)}
+                  {Array.isArray(l.mode) ? l.mode.join(", ") : "-"}
                 </div>
               </div>
 
               <div className="p-3 rounded-lg bg-card border border-border">
-                <div className="text-xs text-secondary">Variance (Grouped)</div>
+                <div className="text-xs text-secondary">Std Dev</div>
                 <div className="mt-1 text-lg font-medium text-foreground">
-                  {l.varianceGrouped?.toFixed(3)}
+                  {l.stddev.toFixed(4)}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="text-xs text-secondary">Variance</div>
+                <div className="mt-1 text-lg font-medium text-foreground">
+                  {l.variance.toFixed(6)}
                 </div>
               </div>
             </>
           )}
+
+
+
+{l.inputMode === "grouped" && l.groupedData.length > 0 && (
+  <>
+    <div className="p-3 rounded-lg bg-card border border-border">
+      <div className="text-xs text-secondary">Mean (Grouped)</div>
+      <div className="mt-1 text-lg font-medium text-foreground">
+        {l.meanGrouped?.toFixed(3)}
+      </div>
+    </div>
+
+    <div className="p-3 rounded-lg bg-card border border-border">
+      <div className="text-xs text-secondary">Mode (Grouped)</div>
+      <div className="mt-1 text-lg font-medium text-foreground">
+        {l.modeGrouped?.label ?? "-"}
+      </div>
+    </div>
+
+    <div className="p-3 rounded-lg bg-card border border-border">
+      <div className="text-xs text-secondary">Std Dev (Grouped)</div>
+      <div className="mt-1 text-lg font-medium text-foreground">
+        {l.stddevGrouped?.toFixed(3)}
+      </div>
+    </div>
+
+    <div className="p-3 rounded-lg bg-card border border-border">
+      <div className="text-xs text-secondary">Variance (Grouped)</div>
+      <div className="mt-1 text-lg font-medium text-foreground">
+        {l.varianceGrouped?.toFixed(3)}
+      </div>
+    </div>
+  </>
+)}
+
 
 
         </div>
