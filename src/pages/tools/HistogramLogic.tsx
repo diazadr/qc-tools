@@ -268,9 +268,11 @@ export const useHistogramLogic = () => {
     }, [selectedSource, isURLLoading])
 
 
-    const data = (numbersManual && numbersManual.length > 0)
-        ? numbersManual
+const data =
+    selectedSource === "manual"
+        ? (numbersManual ?? [])
         : autoNumbers
+
 
     // STATISTICS (MEAN, MEDIAN, MODE, RANGE, VARIANCE, STDEV)
 
