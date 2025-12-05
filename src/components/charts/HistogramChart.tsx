@@ -12,105 +12,182 @@ interface HistogramRow {
 interface Props {
   data: HistogramRow[]
   normalCurve?: { x: number; y: number }[]
+  comparisonLine?: { x: number; y: number }[]
+  showComparisonLine?: boolean
+  mode?: "measurement" | "category"
   yLeftLabel?: string
   height?: number | string
+  meanValue?: number
+  showMean?: boolean
 }
 
-const HistogramChart = forwardRef<any, Props>(({
-  data,
-  normalCurve,
-  yLeftLabel = "Frequency",
-  height = 350
-}, ref) => {
+const HistogramChart = forwardRef<any, Props>(
+  (
+    {
+      data,
+      normalCurve,
+      comparisonLine,
+      showComparisonLine = false,
+      mode = "measurement",
+      yLeftLabel = "Frequency",
+      height = 350,
+      meanValue,
+      showMean = false
+    },
+    ref
+  ) => {
 
-  if (!data || data.length === 0)
-    return <div className="text-secondary">No data.</div>
+    if (!data || data.length === 0)
+      return <div className="text-secondary">No data.</div>
 
-  // posisi numeric berdasarkan midpoint
-  const xValues = data.map(r => r.midpoint ?? 0)
-  const counts = data.map(r => r.count)
+    const isMeasurement = mode === "measurement"
 
-  // batas bawah & atas histogram
-  const minX = Math.min(...data.map(r => r.lower ?? 0))
-  const maxX = Math.max(...data.map(r => r.upper ?? 0))
-
-  const option: any = {
-    grid: { top: 40, left: 65, right: 20, bottom: 40 },
-
-    tooltip: {
-      trigger: "axis",
-      axisPointer: { type: "cross" },
-      formatter: (params: any[]) => {
-        const p = params.find(x => x.seriesType === "bar")
-        if (!p) return ""
-
-        const row = data[p.dataIndex]
-
-        return `
-          <div style="padding:6px 8px">
-            <b>${row.category}</b><br/>
-            ${row.lower != null ? `Class: ${row.lower.toFixed(4)} – ${row.upper?.toFixed(4)}<br/>` : ""}
-            ${row.midpoint != null ? `Midpoint: ${row.midpoint.toFixed(4)}<br/>` : ""}
-            Frequency: ${row.count}
-          </div>
-        `
+    let series: any[] = []
+    let axisX:
+      | {
+        type: "value"
+        min: number
+        max: number
+        name: string
+        axisLabel: { color: string }
       }
-    },
+      | {
+        type: "category"
+        data: string[]
+        axisLabel: { color: string; rotate: number }
+      }
 
-    xAxis: {
-      type: "value",
-      min: minX,
-      max: maxX,
-      name: "Value",
-      axisLabel: { color: "#666" }
-    },
+    // =========================
+    // MODE: MEASUREMENT
+    // =========================
+    if (isMeasurement) {
+      const bins = data.filter(r => r.lower != null && r.upper != null)
 
-    yAxis: {
-      type: "value",
-      name: yLeftLabel,
-      nameLocation: "middle",
-      nameGap: 45,
-      axisLabel: { color: "#666" }
-    },
+      const minX = Math.min(...bins.map(r => r.lower as number))
+      const maxX = Math.max(...bins.map(r => r.upper as number))
 
-    series: [
-      {
-        name: "Frequency",
+      series.push({
+        name: "Histogram",
+        type: "custom",
+        renderItem: (_: any, api: any) => {
+          const x1 = api.value(0)
+          const y = api.value(1)
+          const x2 = api.value(2)
+
+          const start = api.coord([x1, 0])
+          const end = api.coord([x2, y])
+
+          return {
+            type: "rect",
+            shape: {
+              x: start[0],
+              y: end[1],
+              width: end[0] - start[0],
+              height: start[1] - end[1]
+            },
+            style: {
+              fill: "#3B82F6",
+              stroke: "#1E40AF"
+            }
+          }
+        },
+        data: bins.map(b => [b.lower, b.count, b.upper])
+      })
+
+      axisX = {
+        type: "value",
+        min: minX,
+        max: maxX,
+        name: "Value",
+        axisLabel: { color: "#666" }
+      }
+    }
+
+    // =========================
+    // MODE: CATEGORY
+    // =========================
+    else {
+      series.push({
+        name: "Histogram",
         type: "bar",
-
-        // FIX: bar width harus pakai pixel/%. Tidak boleh pakai numeric span.
-        barWidth: "90%",
-        barGap: 0,
-        barCategoryGap: 0,
-
-        data: xValues.map((x, i) => ({
-          value: [x, counts[i]]
-        })),
-
+        data: data.map(d => d.count),
         itemStyle: {
           color: "#3B82F6",
           borderColor: "#1E40AF",
           borderWidth: 1
         }
+      })
+
+      axisX = {
+        type: "category",
+        data: data.map(d => d.category),
+        axisLabel: { color: "#666", rotate: 45 }
+      }
+    }
+
+    // =========================
+    // OPTIONAL LINES
+    // =========================
+
+    if (normalCurve && normalCurve.length && isMeasurement) {
+      series.push({
+        name: "Normal Curve",
+        type: "line",
+        smooth: true,
+        showSymbol: false,
+        lineStyle: { width: 2, color: "#D32F2F" },
+        data: normalCurve.map(p => [p.x, p.y])
+      })
+    }
+
+    if (showComparisonLine && comparisonLine && comparisonLine.length) {
+      series.push({
+        name: "Shape Line",
+        type: "line",
+        showSymbol: false,
+        smooth: false,
+        lineStyle: { width: 2, color: "#F59E0B" },
+        data: comparisonLine.map(p => [p.x, p.y])
+      })
+    }
+
+    if (showMean && meanValue != null && isMeasurement) {
+      series.push({
+        name: "Mean",
+        type: "line",
+        markLine: {
+          symbol: "none",
+          lineStyle: {
+            color: "#444",
+            type: "dashed",
+            width: 2
+          },
+          label: {
+            formatter: "Mean",
+            position: "end",
+            color: "#444"
+          },
+          data: [{ xAxis: meanValue }]
+        }
+      })
+    }
+
+    const option = {
+      grid: { top: 40, left: 65, right: 20, bottom: 50 },
+      tooltip: { trigger: "axis", axisPointer: { type: "cross" } },
+      xAxis: axisX,
+      yAxis: {
+        type: "value",
+        name: yLeftLabel,
+        nameLocation: "middle",
+        nameGap: 45,
+        axisLabel: { color: "#666" }
       },
+      series
+    }
 
-      ...(normalCurve && normalCurve.length
-        ? [
-          {
-            name: "Normal Curve",
-            type: "line",
-            smooth: true,
-            showSymbol: false,
-            yAxisIndex: 0,
-            lineStyle: { width: 2, color: "#D32F2F" },
-            data: normalCurve.map(p => [p.x, p.y])
-          }
-        ]
-        : [])
-    ]
+    return <ReactECharts ref={ref} option={option} style={{ height }} />
   }
-
-  return <ReactECharts ref={ref} option={option} style={{ height }} />
-})
+)
 
 export default HistogramChart

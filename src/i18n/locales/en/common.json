@@ -99,14 +99,19 @@
   "median": "Median"
 },
 
-"sample": {
-  "title": "Sample Data",
-  "cs": "Check Sheet Sample",
-  "pareto": "Pareto Sample",
-  "hist": "Histogram Sample",
-  "preview": "Preview Data",
-  "usedata": "Use This Data"
-},
+"theory": {
+    "title": "QC Tools Theory",
+    "subtitle": "Select a theory to study in a structured and concise format.",
+
+    "checksheet_title": "Check Sheet Theory",
+    "checksheet_desc": "Foundations of quality recording: types, purposes, usage, and digital implementation.",
+
+    "pareto_title": "Pareto Theory",
+    "pareto_desc": "The 80/20 principle, ABC classification, priority analysis, and Pareto chart interpretation.",
+
+    "histogram_title": "Histogram Theory",
+    "histogram_desc": "Data distribution, process variation, histogram shapes, normal curve, Cp/Cpk."
+  },
 
 "report": {
   "title": "QC Report Builder",
@@ -168,7 +173,7 @@
 "nav": {
   "home": "Home",
   "tools": "QC Tools",
-  "sample": "Sample Data",
+  "theory": "Theory",
   "faq": "FAQ",
   "about": "About",
   "privacy": "Terms & Privacy"
@@ -178,7 +183,7 @@
     "description": "QC Tools provides industrial-grade quality analysis supporting students, professionals and real manufacturing environments. Used globally in quality control applications for accuracy, speed and reliability.",
     "qctools": "QC Tools",
     "tools": "Tools",
-    "sampledata": "Sample Data",
+    "theory": "Theory",
     "faq": "FAQ",
     "about": "About",
     "privacy": "Privacy Policy",
@@ -199,8 +204,193 @@
 
   "fast_title": "Cepat & Responsif",
   "fast_desc": "Analisa instan tanpa delay — dioptimalkan untuk inspeksi kualitas real-time di lantai produksi."
-}
+},
 
+  "checksheet_theory": {
+    "title": "CHECK SHEET — Summary of Theory & Application Implementation",
+
+    "section1_title": "1. What is a Check Sheet",
+    "section1_id": "A check sheet is a structured form used to collect quality data directly from the production process. Its purpose is to ensure accuracy, readability, and analysis readiness.",
+    "section1_en": "A check sheet is a structured tool for recording quality data directly at the production site for reliable analysis.",
+    "section1_intro": "According to quality literature, check sheets are used to:",
+    "section1_point1": "Identify patterns.",
+    "section1_point2": "Measure the frequency of occurrences.",
+    "section1_point3": "Locate potential causes of problems.",
+    "section1_point4": "Prepare data for statistical analysis such as Pareto, stratification, and histograms.",
+    "section1_close": "This application implements all these functions through four check sheet modules.",
+
+    "section2_title": "2. Four Check Sheet Types in the Application",
+
+    "A_title": "A. Defective Item Check Sheet",
+    "A_id": "Used to record the number of defects by category over time.",
+    "A_en": "Used to track defect counts per category by day or shift.",
+    "A_theory": "This check sheet is used to count defect types, identify dominant defects, and observe frequency patterns.",
+    "A_imp1": "Customizable defect categories.",
+    "A_imp2": "Daily input directly in cells.",
+    "A_imp3": "Sorting, auto-total, percentages, cumulative percentage.",
+    "A_imp4": "Pareto analysis to determine priority defects.",
+
+    "B_title": "B. Defect Location Check Sheet",
+    "B_id": "Maps defect locations on a product using a circular–radial matrix.",
+    "B_en": "Used to record defect positions on products using a structured grid.",
+    "B_theory": "Location check sheets help identify areas where defects occur most frequently.",
+    "B_imp1": "Customizable circular and radial grids.",
+    "B_imp2": "Location input with severity and comments.",
+    "B_imp3": "Location totals and dominant-area analysis.",
+    "B_imp4": "Pareto analysis for defect areas.",
+
+    "C_title": "C. Defect Cause Check Sheet",
+    "C_id": "Maps defects across workers, days, shifts, and defect types.",
+    "C_en": "Used to identify causes by linking worker–day–shift–defect patterns.",
+    "C_theory": "This sheet helps determine who, when, and under what conditions defects occur.",
+    "C_imp1": "Worker × day × shift × defect matrix.",
+    "C_imp2": "Automatic counters and totals.",
+    "C_imp3": "Identification of problematic workers and shifts.",
+    "C_imp4": "Custom defect symbols.",
+
+    "D_title": "D. Production Distribution Check Sheet",
+    "D_id": "Records variation of process characteristics relative to target, LSL, and USL.",
+    "D_en": "Used to track process measurements in comparison to specification limits.",
+    "D_theory": "Deviation-based check sheets support histogram preparation and variation analysis.",
+    "D_imp1": "Automatic deviation and actual value calculation.",
+    "D_imp2": "Out-of-spec highlighting.",
+    "D_imp3": "Frequency distribution visualization.",
+    "D_imp4": "Variation and deviation dominance analysis.",
+
+    "section3_title": "3. Theoretical Principles Applied in the Application",
+    "section3_p1_title": "Clear Objective",
+    "section3_p1_text": "Each check sheet has a specific purpose: defects, location, causes, or variation.",
+    "section3_p2_title": "Structured Data Recording",
+    "section3_p2_text": "Data is recorded in structured formats based on QC literature.",
+    "section3_p3_title": "Ease of Use & Reliability",
+    "section3_p3_text": "The application ensures simple, consistent input with data-locking features.",
+    "section3_p4_title": "Ready for Statistical Analysis",
+    "section3_p4_text": "Data can be used directly for Pareto, pattern analysis, or stratification.",
+
+    "section4_title": "4. Application Advantages",
+    "section4_point1": "Digital and interactive for fast input.",
+    "section4_point2": "Flexible and fully customizable.",
+    "section4_point3": "Automatic analysis and prioritization.",
+    "section4_point4": "Export to PDF, Excel, CSV, or share link.",
+
+    "section5_title": "5. Conclusion",
+    "section5_text": "The four check sheet modules in this application adapt classical QC theory into a complete, accurate, and easy-to-use digital format."
+  },
+"pareto_theory": {
+    "title": "Teori Pareto dan Klasifikasi ABC",
+
+    "section1_title": "1. Teori Pareto",
+    "section1_desc1": "Prinsip Pareto menyatakan bahwa sebagian kecil penyebab bertanggung jawab atas sebagian besar dampak. Dalam analisis kualitas, konsep ini digunakan untuk mengidentifikasi kategori defect yang paling berpengaruh.",
+    "section1_desc2": "Pareto Chart mengurutkan kategori berdasarkan jumlah defect terbesar dan menampilkan persentase kumulatif untuk menentukan prioritas perbaikan.",
+    "section1_point1": "Sebagian kecil kategori menghasilkan sebagian besar total defect.",
+    "section1_point2": "Urutan kategori membantu fokus pada masalah terbesar terlebih dahulu.",
+    "section1_point3": "Line chart cumulative percentage digunakan untuk menentukan batas prioritas 80%.",
+    "section1_point4": "Area sampai 80% dianggap sebagai zona prioritas perbaikan.",
+
+    "section2_title": "2. Aturan Klasifikasi ABC",
+    "section2_desc": "Klasifikasi ABC adalah metode untuk mengelompokkan kategori berdasarkan kontribusinya terhadap total defect menggunakan cumulative percentage.",
+
+    "A_title": "Kategori A (High impact)",
+    "A_desc": "Kategori dengan kontribusi hingga sekitar 70–80% dari total. Jumlah kategori sedikit namun dampaknya besar. Menjadi prioritas perbaikan utama.",
+
+    "B_title": "Kategori B (Medium impact)",
+    "B_desc": "Kategori dengan kontribusi di rentang 80–90%. Perlu perhatian tetapi tidak sepenting kategori A.",
+
+    "C_title": "Kategori C (Low impact)",
+    "C_desc": "Kategori dengan kontribusi terakhir sekitar 10–20%. Dampaknya kecil dan biasanya banyak. Perbaikan hanya jika biaya rendah atau bersifat housekeeping.",
+
+    "section3_title": "3. Manfaat Analisis Pareto + ABC",
+    "section3_point1": "Menentukan fokus perbaikan berdasarkan data.",
+    "section3_point2": "Mengalokasikan sumber daya secara lebih efektif.",
+    "section3_point3": "Menyaring masalah menjadi tiga tingkat urgensi.",
+    "section3_point4": "Memperkuat proses root cause analysis.",
+
+    "section4_title": "4. Kesimpulan",
+    "section4_text": "Analisis Pareto dan klasifikasi ABC memberikan struktur prioritas yang jelas untuk tindakan perbaikan. Keduanya memastikan bahwa upaya pengendalian kualitas difokuskan pada area dengan dampak terbesar."
+  },
+
+  "histogram_theory": {
+    "title": "Histogram Theory and Distributions",
+
+    "s1_title": "1. Variation and Distribution",
+    "s1_desc1": "If all factors in a process were perfectly constant, all data would take the same value. In reality, it is impossible to keep all conditions fixed.",
+    "s1_desc2": "Data values change continuously but follow certain patterns. These patterns are called distributions.",
+    "s1_desc3": "Understanding distributions allows us to see how data is spread and how the process behaves.",
+
+    "s2_title": "2. Population and Samples",
+    "s2_desc1": "In quality control, samples are collected to evaluate the condition of the population.",
+    "s2_desc2": "A sample is used for decision-making in process control or lot inspection.",
+    "s2_point1": "The population is the entire set of possible data.",
+    "s2_point2": "A sample is a subset taken from the population.",
+    "s2_point3": "Random sampling is used to obtain good representation.",
+
+    "s3_title": "3. Histograms",
+    "s3_desc1": "A histogram is a visual tool for understanding data distribution using class intervals (bins).",
+    "s3_desc2": "As dataset size increases, tables become harder to interpret—histograms help reveal patterns more clearly.",
+
+    "s4_title": "4. Types of Histograms",
+    "s4_desc": "The shape of a histogram provides clues about the state of a process. These are common types:",
+
+    "type_general_title": "General Type (Normal)",
+    "type_general_desc": "The highest frequency appears at the center and gradually decreases toward both ends.",
+    "type_general_note": "This is the most common and stable shape.",
+
+    "type_comb_title": "Comb Type (Multi-modal)",
+    "type_comb_desc": "Frequencies fluctuate irregularly across classes.",
+    "type_comb_note": "Often occurs when multiple distributions are mixed or class intervals are inadequate.",
+
+    "type_positive_title": "Positively Skewed",
+    "type_positive_desc": "A peak on the left with a long tail extending to the right.",
+    "type_positive_note": "Occurs when the upper limit is loosely controlled.",
+
+    "type_left_precipice_title": "Left-hand Precipice",
+    "type_left_precipice_desc": "A peak very close to the left boundary with a steep drop to the right.",
+    "type_left_precipice_note": "Occurs when the lower limit is tightly controlled.",
+
+    "type_plateau_title": "Plateau Type",
+    "type_plateau_desc": "Relatively flat frequencies across the middle region.",
+    "type_plateau_note": "Indicates the presence of several merged subpopulations.",
+
+    "type_twin_peak_title": "Twin-Peak",
+    "type_twin_peak_desc": "Two significant peaks appear.",
+    "type_twin_peak_note": "Occurs when two distinct processes are combined.",
+
+    "type_isolated_title": "Isolated Peak",
+    "type_isolated_desc": "A small, separate peak appears in addition to the main distribution.",
+    "type_isolated_note": "May indicate measurement error, abnormal data, or mixing from another process.",
+
+    "s5_title": "5. Comparing Histograms with Specification Limits",
+    "s5_desc1": "When specification limits exist, the histogram can be compared with them to evaluate the process condition.",
+    "s5_ok1": "Histogram is fully within the specification limits.",
+    "s5_ok2": "The mean is located at the center of the specification.",
+    "s5_ok3": "Variation is small enough to satisfy the requirement.",
+    "s5_bad1": "The mean is shifted away from the center.",
+    "s5_bad2": "Variation is too large relative to the specification width.",
+
+    "s6_title": "6. Stratification of Histograms",
+    "s6_desc1": "Stratification is used when data originate from several different conditions.",
+    "s6_desc2": "Each group is treated as a separate subpopulation called a stratum.",
+    "s6_point1": "Different machines.",
+    "s6_point2": "Different shifts.",
+    "s6_point3": "Different operators.",
+
+    "s7_title": "7. Measures of Distributions",
+    "s7_desc1": "Histograms help compute fundamental statistical properties.",
+    "s7_mean": "Mean: the central location of the distribution.",
+    "s7_variance": "Variance: the degree of spread among the data.",
+    "s7_stddev": "Standard deviation: the square root of variance.",
+
+    "s8_title": "8. Normal Distribution",
+    "s8_desc1": "A normal distribution emerges when the number of data becomes sufficiently large and influences are independent.",
+    "s8_point1": "It is symmetrical.",
+    "s8_point2": "The central frequency is the highest.",
+    "s8_desc2": "A normal distribution is characterized by two parameters: the mean (μ) and the standard deviation (σ).",
+
+    "s9_title": "9. Process Capability Index (Cp & Cpk)",
+    "s9_desc1": "Used to determine whether a process can satisfy specification limits.",
+    "s9_cp": "Cp measures the width of the process relative to tolerance.",
+    "s9_cpk": "Cpk measures how centered the process mean is within the specification."
+  }
 
 
 }

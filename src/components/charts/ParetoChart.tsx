@@ -10,9 +10,13 @@ export interface ParetoChartHandle {
   getImageDataUrl: () => string | null;
 }
 
+
+
 interface Props {
   data: ParetoItem[];
   show80Line?: boolean;
+  showABCLine?: boolean;
+  showABCLabel?: boolean;
   yLeftLabel?: string;
   yRightLabel?: string;
   product?: string;
@@ -26,6 +30,8 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
     {
       data,
       show80Line = true,
+      showABCLine = false,
+      showABCLabel = false,
       yLeftLabel = "Count",
       yRightLabel = "Cumulative %",
       product,
@@ -36,13 +42,43 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
     ref
   ) => {
     const chartRef = useRef<any>(null);
+    const getImageDataUrl = () => {
+      if (!chartRef.current) return null;
+      return chartRef.current.getEchartsInstance().getDataURL({
+        type: "png",
+        pixelRatio: 3,
+        backgroundColor: "#FFFFFF",
+      });
+    };
 
+    // ======================================================
+    // FUNGSI AMBIL UKURAN DOM CHART
+    // ======================================================
+    const getImageSize = () => {
+      const el = chartRef.current?.getEchartsInstance().getDom();
+      return el ? { w: el.offsetWidth, h: el.offsetHeight } : null;
+    };
+     useImperativeHandle(ref, () => ({
+    getImageDataUrl,
+    getImageSize,
+  }));
     const sorted = data;
     const total = sorted.reduce((s, x) => s + x.count, 0);
 
+    // Hitung kategori A/B/C
+    let cumulativeABC = 0;
+    const abcClass = sorted.map((d) => {
+      cumulativeABC += d.count;
+      const pct = total === 0 ? 0 : (cumulativeABC / total) * 100;
+
+      if (pct <= 80) return "A";
+      if (pct <= 95) return "B";
+      return "C";
+    });
+
+    // Untuk chart kategori
     let cumulative = 0;
     const categories = sorted.map((d) => `${d.category} (${d.count})`);
-
     const counts = sorted.map((d) => d.count);
 
     const cumulativePercent = sorted.map((d) => {
@@ -50,20 +86,30 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
       return Number(((cumulative / total) * 100).toFixed(1));
     });
 
+    // Warna bar - mode ABC opsional
     const topColors = ["#DC2626", "#EA580C", "#EAB308"];
     const barColors = sorted.map((d, i) => {
       if (d.category.includes("Others (")) return "#6B7280";
+
+      if (showABCLine || showABCLabel) {
+        const cls = abcClass[i];
+        if (cls === "A") return "#DC2626";
+        if (cls === "B") return "#EAB308";
+        return "#1E40AF";
+      }
+
       return i < 3 ? topColors[i] : "#1E3A8A";
     });
 
-    const metaTitle = [
-      product ? `Product: ${product}` : "",
-      line ? `Line: ${line}` : "",
-      shift ? `Shift: ${shift}` : "",
-      date ? `Date: ${date}` : "",
-    ]
-      .filter(Boolean)
-      .join(" | ") || "Pareto Chart";
+    const metaTitle =
+      [
+        product ? `Product: ${product}` : "",
+        line ? `Line: ${line}` : "",
+        shift ? `Shift: ${shift}` : "",
+        date ? `Date: ${date}` : "",
+      ]
+        .filter(Boolean)
+        .join(" | ") || "Pareto Chart";
 
     const option = {
       title: {
@@ -83,7 +129,8 @@ const ParetoChart = forwardRef<ParetoChartHandle, Props>(
 <b>${bar?.name}</b><br/>
 Rank: ${rank}<br/>
 ${yLeftLabel}: ${bar?.value}<br/>
-${yRightLabel}: ${line?.value}%
+${yRightLabel}: ${line?.value}%<br/>
+ABC: ${abcClass[bar?.dataIndex] || "-"}
           `;
         },
       },
@@ -98,11 +145,7 @@ ${yRightLabel}: ${line?.value}%
       xAxis: {
         type: "category",
         data: categories,
-        axisLabel: {
-          rotate: 35,
-          color: "#9ca3af",
-          fontSize: 11,
-        },
+        axisLabel: { rotate: 35, color: "#9ca3af", fontSize: 11 },
         axisLine: { lineStyle: { color: "#475569" } },
       },
 
@@ -125,16 +168,29 @@ ${yRightLabel}: ${line?.value}%
       ],
 
       series: [
+        // BAR SERIES
         {
           name: yLeftLabel,
           type: "bar",
           data: counts,
           barWidth: "60%",
-          itemStyle: {
-            color: (p: any) => barColors[p.dataIndex],
-          },
+          itemStyle: { color: (p: any) => barColors[p.dataIndex] },
+
+          ...(showABCLabel
+            ? {
+              label: {
+                show: true,
+                position: "top",
+                formatter: (p: any) => abcClass[p.dataIndex],
+                color: "#FFFFFF",
+                fontSize: 11,
+                fontWeight: 700,
+              },
+            }
+            : {}),
         },
 
+        // LINE SERIES
         {
           name: yRightLabel,
           type: "line",
@@ -153,8 +209,27 @@ ${yRightLabel}: ${line?.value}%
           itemStyle: { color: "#F59E0B" },
           lineStyle: { width: 3, color: "#F59E0B" },
 
-          ...(show80Line
+          ...(showABCLine
             ? {
+              markLine: {
+                yAxisIndex: 1,
+                data: [{ yAxis: 80 }, { yAxis: 95 }],
+                lineStyle: {
+                  type: "dashed",
+                  width: 2,
+                  color: "#22C55E",
+                },
+                label: {
+                  formatter: (p: any) =>
+                    p.value === 80 ? "80%" : "95%",
+                  position: "end",
+                  color: "#22C55E",
+                  fontSize: 11,
+                },
+              },
+            }
+            : show80Line
+              ? {
                 markLine: {
                   yAxisIndex: 1,
                   data: [{ yAxis: 80 }],
@@ -171,7 +246,7 @@ ${yRightLabel}: ${line?.value}%
                   },
                 },
               }
-            : {}),
+              : {}),
         },
       ],
     };

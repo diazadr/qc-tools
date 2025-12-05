@@ -2,7 +2,14 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
+
 import { useEffect, useState, useRef } from "react";
+
+import {
+  HiHome,
+  HiWrenchScrewdriver,
+  HiBookOpen
+} from "react-icons/hi2";
 
 const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
   const { t } = useTranslation();
@@ -11,8 +18,6 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef(0);
-  const touchDiff = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 80);
@@ -47,6 +52,8 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
       `}
     >
       <div className="w-full px-6 flex items-center justify-between">
+
+        {/* LOGO */}
         <Link
           to="/"
           className={`
@@ -59,27 +66,35 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
           `}
           onClick={() => setMenuOpen(false)}
         >
-          <img src="/img/icon.png" className="w-6 h-6 object-contain" />
+          <img src="/img/icon.webp" className="w-6 h-6 object-contain" />
           QC Tools
         </Link>
 
+        {/* DESKTOP NAV */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/" className={isActive("/")}>
+          <Link to="/" className={`flex items-center gap-2 ${isActive("/")}`}>
+            <HiHome className="w-4 h-4" />
             {t("nav.home")}
           </Link>
-          <Link to="/tools" className={isActive("/tools")}>
+
+          <Link to="/checksheet/defective-item" className={`flex items-center gap-2 ${isActive("/tools")}`}>
+            <HiWrenchScrewdriver className="w-4 h-4" />
             {t("nav.tools")}
           </Link>
-          <Link to="/sample" className={isActive("/sample")}>
-            {t("nav.sample")}
+
+          <Link to="/theory" className={`flex items-center gap-2 ${isActive("/theory")}`}>
+            <HiBookOpen className="w-4 h-4" />
+            {t("nav.theory")}
           </Link>
         </nav>
 
+        {/* DESKTOP RIGHT SIDE */}
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle inHero={isLandingPage && !scrolled} />
           <LanguageSwitcher inHero={isLandingPage && !scrolled} />
         </div>
 
+        {/* MOBILE BURGER */}
         <button
           className={`
             md:hidden p-2 flex items-center justify-center z-[90] relative rounded-full
@@ -113,39 +128,54 @@ const Navbar = ({ isLandingPage }: { isLandingPage: boolean }) => {
         </button>
       </div>
 
+      {/* MOBILE OVERLAY */}
       {menuOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setMenuOpen(false)}
-        >
+        <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="absolute left-0 top-0 w-[30%] h-full" />
         </div>
       )}
 
+      {/* MOBILE DRAWER */}
       <div
         ref={menuRef}
         className={`
           fixed top-0 right-0 h-full w-[78%] max-w-[300px] z-50
           transition-transform duration-300 ease-out
           ${menuOpen ? "translate-x-0" : "translate-x-full"}
-          ${isLandingPage && !scrolled ? "bg-[#0f1520] text-white" : "bg-card text-text shadow-xl"}
+          ${
+            isLandingPage && !scrolled
+              ? "bg-[#0f1520] text-white"
+              : "bg-card text-text shadow-xl"
+          }
         `}
-        onTouchStart={(e) => (touchStartX.current = e.touches[0].clientX)}
-        onTouchMove={(e) => (touchDiff.current = e.touches[0].clientX - touchStartX.current)}
-        onTouchEnd={() => {
-          if (touchDiff.current > 50) setMenuOpen(false);
-        }}
       >
         <div className="flex flex-col gap-5 p-6 mt-14 text-lg font-medium">
-          <Link to="/" onClick={() => setMenuOpen(false)} className={isActive("/")}>
+
+          <Link
+            to="/"
+            onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 ${isActive("/")}`}
+          >
+            <HiHome className="w-5 h-5" />
             {t("nav.home")}
           </Link>
-          <Link to="/tools" onClick={() => setMenuOpen(false)} className={isActive("/tools")}>
+
+          <Link
+            to="/tools"
+            onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 ${isActive("/tools")}`}
+          >
+            <HiWrenchScrewdriver className="w-5 h-5" />
             {t("nav.tools")}
           </Link>
-          <Link to="/sample" onClick={() => setMenuOpen(false)} className={isActive("/sample")}>
-            {t("nav.sample")}
+
+          <Link
+            to="/theory"
+            onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 ${isActive("/theory")}`}
+          >
+            <HiBookOpen className="w-5 h-5" />
+            {t("nav.theory")}
           </Link>
 
           <div className="border-t pt-4 mt-2 flex items-center gap-4">

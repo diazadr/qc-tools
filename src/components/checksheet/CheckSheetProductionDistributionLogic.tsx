@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { useChecksheetStore } from "../../store/useChecksheetStore"
-import { exportExcel } from "../../utils/dataio/excel"
-import { exportCSV } from "../../utils/dataio/csv"
-import { exportPDF } from "../../utils/dataio/pdf"
+import { exportExcel } from "../../utils/dataio/excel/excel"
+import { exportCSV } from "../../utils/dataio/csv/csv"
+import { exportPDF } from "../../utils/dataio/pdf/pdf"
 
 export interface DevRow {
   deviation: number
@@ -55,6 +55,18 @@ export const useDistributionLogic = () => {
   const [selectedDev, setSelectedDev] = useState<number | null>(null)
   const [manualInput, setManualInput] = useState(0)
 
+const encodeURLSafe = (str: string) =>
+  btoa(str)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "")
+
+const decodeURLSafe = (str: string) => {
+  const pad = str.length % 4 === 0 ? "" : "=".repeat(4 - (str.length % 4))
+  const base64 = str.replace(/-/g, "+").replace(/_/g, "/") + pad
+  return atob(base64)
+}
+
   const getShareLink = () => {
     const snapshot = {
       metadata,
@@ -68,81 +80,75 @@ export const useDistributionLogic = () => {
     }
 
     const json = JSON.stringify(snapshot)
-    const base64 = btoa(json)
+    const encoded = encodeURLSafe(json)
 
-    return `${window.location.origin}/?dist=${base64}`
+    // Tetap pada path sekarang
+    const baseURL = window.location.href.split("?")[0]
+
+    return `${baseURL}?dist=${encoded}`
   }
 
-const doExportCSV = () => {
-  exportCSV(
-    {
-      type: "DISTRIBUTION",
-      title: metadata.product || "Distribution",
-      metadata,
-      customFields,
-      rows,
-      target,
-      LSL,
-      USL,
-      binSize,
-      unit,
-    },
-    "distribution"
-  )
-}
+  const preparedRows = rows.map(r => ({
+    deviation: r.deviation,
+    count: r.count,
+    actual: target + r.deviation * binSize
+  }))
+
+  const doExportCSV = () => {
+    exportCSV(
+      {
+        type: "DISTRIBUTION",
+        title: metadata.product || "Distribution",
+        metadata,
+        customFields,
+        rows: preparedRows,
+        target,
+        LSL,
+        USL,
+        binSize,
+        unit,
+      },
+      "distribution"
+    )
+  }
+
+  const doExportExcel = () => {
+    exportExcel(
+      {
+        type: "DISTRIBUTION",
+        title: metadata.product || "Distribution",
+        metadata,
+        customFields,
+        rows: preparedRows,
+        target,
+        LSL,
+        USL,
+        binSize,
+        unit,
+      },
+      "distribution"
+    )
+  }
 
 
-const doExportExcel = () => {
-  exportExcel(
-    {
-      type: "DISTRIBUTION",
-      title: metadata.product || "Distribution",
-      metadata,
-      customFields,
-      rows,
-      target,
-      LSL,
-      USL,
-      binSize,
-      unit,
-    },
-    "distribution"
-  )
-}
+  const doExportPDF = () => {
+    exportPDF(
+      {
+        type: "DISTRIBUTION",
+        title: metadata.product || "Distribution",
+        metadata,
+        customFields,
+        rows: preparedRows,
+        target,
+        LSL,
+        USL,
+        binSize,
+        unit,
+      },
+      "distribution"
+    )
+  }
 
-doExportCSV: () => exportCSV(
-  {
-    type: "DISTRIBUTION",
-    title: metadata.product || "Distribution",
-    metadata,
-    customFields,
-    rows,
-    target,
-    LSL,
-    USL,
-    binSize,
-    unit,
-  },
-  "distribution"
-)
-
-const doExportPDF = () => {
-  exportPDF(
-    {
-      type: "DISTRIBUTION",
-      title: metadata.product || "Distribution",
-      metadata,
-      customFields,
-      rows,
-      target,
-      LSL,
-      USL,
-      binSize,
-      unit,
-    },
-    "distribution"
-  )
-}
 
   const metadataFilled =
     customFields.every(f => (metadata[f] ?? "").trim()) &&
@@ -162,7 +168,7 @@ const doExportPDF = () => {
     const params = new URLSearchParams(window.location.search)
     const encoded = params.get("dist")
     if (encoded) {
-      const decoded = JSON.parse(atob(encoded))
+      const decoded = JSON.parse(decodeURLSafe(encoded))
 
       setMetadata(decoded.metadata || DEFAULT_METADATA)
       setCustomFields(decoded.customFields || DEFAULT_FIELDS)
@@ -207,8 +213,8 @@ const doExportPDF = () => {
   const increment = () => {
     if (selectedDev === null || locked) return
     setRows(prev => prev.map(r =>
-     rows.indexOf(r) === selectedDev
- ? { ...r, count: r.count + 1 } : r
+      rows.indexOf(r) === selectedDev
+        ? { ...r, count: r.count + 1 } : r
     ))
     saveSnapshot()
     autoLockIfDataExists()
@@ -217,40 +223,40 @@ const doExportPDF = () => {
   const decrement = () => {
     if (selectedDev === null || locked) return
     setRows(prev => prev.map(r =>
-    rows.indexOf(r) === selectedDev
- && r.count > 0
+      rows.indexOf(r) === selectedDev
+        && r.count > 0
         ? { ...r, count: r.count - 1 }
         : r
     ))
     saveSnapshot()
     autoLockIfDataExists()
   }
-const applyManualInput = () => {
-  if (selectedDev === null || locked) return
-  if (manualInput < 0) return
-  setRows(prev => prev.map((r, i) =>
-    i === selectedDev ? { ...r, count: manualInput } : r
-  ))
-  setManualInput(0)
-  saveSnapshot()
-  autoLockIfDataExists()
-}
-const updateCount = (index: number, value: number) => {
-  setRows(prev => prev.map((r, i) => 
-    i === index ? { ...r, count: value } : r
-  ))
-  saveSnapshot()
-  autoLockIfDataExists()
-}
+  const applyManualInput = () => {
+    if (selectedDev === null || locked) return
+    if (manualInput < 0) return
+    setRows(prev => prev.map((r, i) =>
+      i === selectedDev ? { ...r, count: manualInput } : r
+    ))
+    setManualInput(0)
+    saveSnapshot()
+    autoLockIfDataExists()
+  }
+  const updateCount = (index: number, value: number) => {
+    setRows(prev => prev.map((r, i) =>
+      i === index ? { ...r, count: value } : r
+    ))
+    saveSnapshot()
+    autoLockIfDataExists()
+  }
 
 
-const clearSelected = () => {
-  if (selectedDev === null || locked) return
-  setRows(prev => prev.map((r, i) =>
-    i === selectedDev ? { ...r, count: 0 } : r
-  ))
-  saveSnapshot()
-}
+  const clearSelected = () => {
+    if (selectedDev === null || locked) return
+    setRows(prev => prev.map((r, i) =>
+      i === selectedDev ? { ...r, count: 0 } : r
+    ))
+    saveSnapshot()
+  }
 
 
   const clearAll = () => {
@@ -334,11 +340,11 @@ const clearSelected = () => {
     applyManualInput, clearSelected, clearAll,
     saveSnapshot,
     getShareLink,
-    doExportCSV, doExportExcel, doExportPDF,updateCount,
-        totalCount,
+    doExportCSV, doExportExcel, doExportPDF, updateCount,
+    totalCount,
     inSpec,
     outSpec,
-    worstDeviation,  
+    worstDeviation,
     LSLActual,
     USLActual,
 

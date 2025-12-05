@@ -1,35 +1,32 @@
-interface Props {
-  template: string;
-  setTemplate: (v: string) => void;
-}
+import { Link, useLocation } from "react-router-dom";
 
-const CheckSheetSelector = ({ template, setTemplate }: Props) => {
+const CheckSheetSelector = () => {
+  const location = useLocation();
+
   return (
     <div className="w-full border-b border-border mb-6">
-
       <div className="flex">
         <SelectorTab
-          active={template === "defective-item"}
           label="Defective Item"
-          onClick={() => setTemplate("defective-item")}
+          to="/checksheet/defective-item"
+          active={location.pathname === "/checksheet/defective-item"}
         />
         <SelectorTab
-          active={template === "production-distribution"}
           label="Distribution"
-          onClick={() => setTemplate("production-distribution")}
+          to="/checksheet/production-distribution"
+          active={location.pathname === "/checksheet/production-distribution"}
         />
         <SelectorTab
-          active={template === "defect-location"}
           label="Location"
-          onClick={() => setTemplate("defect-location")}
+          to="/checksheet/defect-location"
+          active={location.pathname === "/checksheet/defect-location"}
         />
         <SelectorTab
-          active={template === "defect-cause"}
           label="Cause"
-          onClick={() => setTemplate("defect-cause")}
+          to="/checksheet/defect-cause"
+          active={location.pathname === "/checksheet/defect-cause"}
         />
       </div>
-
     </div>
   );
 };
@@ -39,12 +36,12 @@ export default CheckSheetSelector;
 interface SelectorTabProps {
   active: boolean;
   label: string;
-  onClick: () => void;
+  to: string;
 }
 
-const SelectorTab = ({ active, label, onClick }: SelectorTabProps) => (
-  <button
-    onClick={onClick}
+const SelectorTab = ({ active, label, to }: SelectorTabProps) => (
+  <Link
+    to={to}
     className={`flex-1 py-2.5 text-sm md:text-base text-center transition border-b-2 ${
       active
         ? "border-primary text-primary font-medium"
@@ -52,5 +49,5 @@ const SelectorTab = ({ active, label, onClick }: SelectorTabProps) => (
     }`}
   >
     {label}
-  </button>
+  </Link>
 );

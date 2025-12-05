@@ -5,7 +5,6 @@ import { useEffect } from "react";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-
   const isLandingPage = location.pathname === "/";
 
   useEffect(() => {
@@ -22,11 +21,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)]">
       <Navbar isLandingPage={isLandingPage} />
+
       {isLandingPage ? (
         <main className="flex-1 w-full">{children}</main>
       ) : (
-        <main className="flex-1 max-w-6xl mx-auto w-full px-4">{children}</main>
+        <main className="flex-1 max-w-6xl mx-auto w-full px-4 pt-20">{children}</main>
       )}
+
       <Footer />
     </div>
   );

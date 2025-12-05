@@ -7,7 +7,7 @@ import { HiChevronDown } from "react-icons/hi2";
 import FlipFeatureCard from "../components/common/FlipFeatureCard";
 import { MotionSection } from "../components/common/MotionSection";
 import SectionTitle from "../components/common/SectionTitle";
-
+import { HiCheckCircle, HiSparkles, HiCube, HiChartBar } from "react-icons/hi2";
 import { heroImages, toolsImages, featureKeys, toolsKeys } from "../config/data";
 import { sectionFade, staggerContainer, itemFade } from "../config/animations";
 
@@ -15,13 +15,30 @@ const LandingPage = () => {
   const { t } = useTranslation();
   const [activeTool, setActiveTool] = useState<number | null>(null);
   const [currentImage, setCurrentImage] = useState(0);
+const featureIcons: Record<string, React.ReactNode> = {
+  f1: <HiCheckCircle className="text-lg md:text-xl" />,
+  f2: <HiSparkles className="text-lg md:text-xl" />,
+  f3: <HiCube className="text-lg md:text-xl" />,
+  f4: <HiChartBar className="text-lg md:text-xl" />,
+  f5: <HiCheckCircle className="text-lg md:text-xl" />,
+  f6: <HiSparkles className="text-lg md:text-xl" />,
+};
+
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % heroImages.length);
-    }, 3000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    heroImages.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
 
   return (
     <div className="w-full page">
@@ -60,23 +77,45 @@ const LandingPage = () => {
           </motion.button>
         </div>
 
-        <div className="hidden md:block relative w-[60%] h-full diagonal-wrapper md:absolute md:right-0 md:top-0">
-          <div className="hero-img-diagonal"
-            style={{ backgroundImage: `url(${heroImages[currentImage]})` }} />
+        <div className="hidden md:block relative w-[60%] h-full diagonal-wrapper md:absolute md:right-0 md:top-0 overflow-hidden">
+
+          {heroImages.map((img, i) => (
+            <div
+              key={i}
+              className={`hero-img-diagonal absolute inset-0 transition-opacity duration-[1000ms]
+        ${i === currentImage ? "opacity-100" : "opacity-0"}
+      `}
+              style={{
+                backgroundImage: `url(${img})`,
+              }}
+            />
+          ))}
+
         </div>
+
       </section>
 
       {/* FEATURES */}
       <MotionSection className="max-w-4xl mx-auto text-center py-14 px-4">
         <SectionTitle>{t("landing.features")}</SectionTitle>
-        <motion.div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-text" variants={staggerContainer}>
+
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-3 gap-4 text-text"
+          variants={staggerContainer}
+        >
           {featureKeys.map((key) => (
-            <motion.div key={key} variants={itemFade} className="qc-card text-sm md:text-base">
-              ✔ {t(`landing.${key}`)}
+            <motion.div
+              key={key}
+              variants={itemFade}
+              className="qc-card flex items-center gap-2 text-sm md:text-base"
+            >
+              {featureIcons[key]}
+              {t(`landing.${key}`)}
             </motion.div>
           ))}
         </motion.div>
       </MotionSection>
+
 
       {/* TOOLS */}
       <MotionSection data-id="tools" className="w-full max-w-none py-14 px-0 text-center">
@@ -122,7 +161,7 @@ const LandingPage = () => {
             <p className="text-secondary mt-4 max-w-md">{t("workflow.subtitle")}</p>
 
             <motion.div className="qc-number-image mt-10"
-              style={{ backgroundImage: "url('/img/3qcworkflow.webp')",  backgroundSize: "60%",backgroundPosition: "left", }}
+              style={{ backgroundImage: "url('/img/3qcworkflow.webp')", backgroundSize: "60%", backgroundPosition: "left", }}
               variants={itemFade}>
               3 QC
             </motion.div>

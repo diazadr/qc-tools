@@ -6,18 +6,18 @@ const Footer = () => {
   return (
 <footer className="bg-primary text-white pt-16 pb-10 mt-20 relative overflow-hidden">
   <img 
-    src="/img/icon.png" 
+    src="/img/icon.webp" 
     className="absolute left-[-20px] bottom-[-20px] h-60 rotate-50 opacity-[0.18]"
   />
 
   <img 
-    src="/img/icon.png" 
+    src="/img/icon.webp" 
     className="absolute right-[-20px] top-[-20px] h-60 rotate-230 opacity-[0.18]"
   />
   <div className="relative max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 px-6">
 
     <div>
-      <img src="/img/icon.png" className="h-14 mb-4" />
+      <img src="/img/icon.webp" className="h-14 mb-4" />
       <p className="text-sm leading-relaxed text-white/90 max-w-md">
         {t("footer.description")}
       </p>
@@ -25,16 +25,13 @@ const Footer = () => {
 
     <div className="flex flex-col gap-3 mt-4 md:mt-0">
       <h3 className="font-semibold text-white">{t("footer.qctools")}</h3>
-      <a href="/tools" className="text-white hover:text-white/80">{t("footer.tools")}</a>
-      <a href="/sample" className="text-white hover:text-white/80">{t("footer.sampledata")}</a>
+      <a href="/checksheet/defective-item" className="text-white hover:text-white/80">{t("footer.tools")}</a>
+      <a href="/theory" className="text-white hover:text-white/80">{t("footer.theory")}</a>
     </div>
 
     <div className="flex flex-col gap-3 mt-4 md:mt-0">
       <h3 className="font-semibold text-white">{t("footer.support")}</h3>
-      <a href="/contact" className="text-white hover:text-white/80">{t("footer.contact")}</a>
-      <a href="/terms" className="text-white hover:text-white/80">{t("footer.terms")}</a>
-      <a href="#" className="text-white hover:text-white/80">{t("footer.docs")}</a>
-      <a href="#" className="text-white hover:text-white/80">{t("footer.api")}</a>
+      <a href="https://github.com/diazadr/qc-tools" className="text-white hover:text-white/80">{t("footer.docs")}</a>
     </div>
 
   </div>

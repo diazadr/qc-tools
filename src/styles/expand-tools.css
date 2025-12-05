@@ -33,6 +33,7 @@
   font-weight: 800;
   line-height: 1.25;
   margin-bottom: 4px;
+  color: #fff !important;
 }
 .expand-desc {
   font-size: clamp(0.9rem, 3vw, 1.25rem);
@@ -41,6 +42,7 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+  color: #fff !important;
 }
 .expand-img.active {
   flex: 1.7 !important;

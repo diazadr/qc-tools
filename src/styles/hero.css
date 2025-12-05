@@ -33,8 +33,9 @@
   background-position: center;
   clip-path: inherit;
   filter: brightness(0.50) contrast(1.05);
-  transition: background-image 1s ease-in-out;
+  /* transition: background-image 1s ease-in-out;  <-- hapus */
 }
+
 
 @media (max-width: 768px) {
   .hero-title {

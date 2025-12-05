@@ -6,36 +6,37 @@ export type DataType =
   | "DEFECT_LOCATION"
   | "DEFECT_CAUSE"
 
+
 export interface ChecksheetData {
   type: "CHECKSHEET"
   title: string
   days: string[]
 
-  metadata: Record<string, string> // ⬅ baru
-  customFields: string[]           // ⬅ baru
+  metadata: Record<string, string>
+  customFields: string[]
 
   categories: {
     name: string
     counts: Record<string, number>
-    total?: number                 // ⬅ baru
-    percentage?: number            // ⬅ baru
+    total: number
+    percentage: number
   }[]
 
-  allTotal: number                  // ⬅ baru
-  sortedCategories?: any[]          // ⬅ baru
+  allTotal: number
 }
+
 
 export interface DefectCauseData {
   type: "DEFECT_CAUSE"
   title: string
 
-  metadata: Record<string,string>
+  metadata: Record<string, string>
   customFields: string[]
 
   workers: string[]
-  defectType: string[]
+  defectTypes: string[]
   days: string[]
-  shift: string[]
+  shifts: string[]
 
   dataset: {
     worker: string
@@ -46,10 +47,9 @@ export interface DefectCauseData {
 
   totalAll: number
 
-  sortKey?: string | null
-  sortAsc?: boolean
+  sortKey: string | null
+  sortAsc: boolean
 }
-
 
 
 export interface DefectLocationData {
@@ -72,26 +72,32 @@ export interface DefectLocationData {
     timestamp: number
   }[]
 
-  totalAll?: number
+  totalAll: number
 }
+
 
 export interface HistogramData {
   type: "HISTOGRAM"
   title: string
   values: number[]
-  bins?: number
+  bins: number
 }
+
 
 export interface ParetoData {
   type: "PARETO"
   title: string
+
   items: {
     category: string
     count: number
-    percentage?: number
-    cumulativePercentage?: number
+    percentage: number
+    cumulativePercentage: number
   }[]
+
+  total: number
 }
+
 
 export interface DistributionData {
   type: "DISTRIBUTION"
@@ -102,7 +108,7 @@ export interface DistributionData {
 
   rows: {
     deviation: number
-    actual?: number
+    actual: number
     count: number
   }[]
 
@@ -114,4 +120,10 @@ export interface DistributionData {
 }
 
 
-export type QCData = ChecksheetData | HistogramData | ParetoData | DistributionData | DefectLocationData | DefectCauseData
+export type QCData =
+  | ChecksheetData
+  | HistogramData
+  | ParetoData
+  | DistributionData
+  | DefectLocationData
+  | DefectCauseData

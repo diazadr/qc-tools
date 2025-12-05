@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import type { ReactNode } from "react";
 import { sectionFade } from "../../config/animations";
 
@@ -9,7 +10,7 @@ export const MotionSection = ({
 }: {
   children: ReactNode;
   className?: string;
-  variants?: typeof sectionFade;
+  variants?: Variants; // ← fleksibel, bisa terima semua variants
 }) => (
   <motion.section
     className={className}
@@ -17,7 +18,6 @@ export const MotionSection = ({
     initial="hidden"
     whileInView="visible"
     viewport={{ once: false, amount: 0.15 }}
-    transition={{ duration: 0.6, ease: "easeOut" }}
   >
     {children}
   </motion.section>

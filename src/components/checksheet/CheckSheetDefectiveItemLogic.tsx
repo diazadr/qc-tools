@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useChecksheetStore } from "../../store/useChecksheetStore";
-import { exportExcel } from "../../utils/dataio/excel"
-import { exportCSV } from "../../utils/dataio/csv"
-import { exportPDF } from "../../utils/dataio/pdf"
+import { exportExcel } from "../../utils/dataio/excel/excel"
+import { exportCSV } from "../../utils/dataio/csv/csv"
+import { exportPDF } from "../../utils/dataio/pdf/pdf"
 
 export interface Category {
   id: string;
@@ -70,35 +70,35 @@ const getShareLink = () => {
   const json = JSON.stringify(snapshot)
   const base64 = btoa(json)
 
-  return `${window.location.origin}/?d=${base64}`
+  return `${window.location.origin}${window.location.pathname}?d=${base64}`
 }
 
-const doExportCSV = () => {
-  const prepared = sortedCategories.map(c => {
-    const total = getRowTotal(c)
-    const pct = allTotal > 0 ? (total / allTotal) * 100 : 0
+  const doExportCSV = () => {
+    const prepared = sortedCategories.map(c => {
+      const total = getRowTotal(c)
+      const pct = allTotal > 0 ? (total / allTotal) * 100 : 0
 
-    return {
-      name: c.name,
-      counts: c.counts,
-      total,
-      percentage: pct,
-    }
-  })
+      return {
+        name: c.name,
+        counts: c.counts,
+        total,
+        percentage: pct,
+      }
+    })
 
-  exportCSV(
-    {
-      type: "CHECKSHEET",
-      title: metadata.product || "Defective Item",
-      days,
-      categories: prepared,
-      metadata,
-      customFields,
-      allTotal,
-    },
-    "defective-item"
-  )
-}
+    exportCSV(
+      {
+        type: "CHECKSHEET",
+        title: metadata.product || "Defective Item",
+        days,
+        categories: prepared,
+        metadata,
+        customFields,
+        allTotal,
+      },
+      "defective-item"
+    )
+  }
 
 
   const doExportPDF = () => {
@@ -170,17 +170,17 @@ const doExportCSV = () => {
 
 
   useEffect(() => {
-     const params = new URLSearchParams(window.location.search)
-  const encoded = params.get("d")
-  if (encoded) {
-    const decoded = JSON.parse(atob(encoded))
+    const params = new URLSearchParams(window.location.search)
+    const encoded = params.get("d")
+    if (encoded) {
+      const decoded = JSON.parse(atob(encoded))
 
-    setDays(decoded.days || DEFAULT_DAYS)
-    setMetadata(decoded.metadata || DEFAULT_METADATA)
-    setCustomFields(decoded.customFields || DEFAULT_FIELDS)
-    setCategories(decoded.categories || DEFAULT_CATEGORIES)
-    return
-  }
+      setDays(decoded.days || DEFAULT_DAYS)
+      setMetadata(decoded.metadata || DEFAULT_METADATA)
+      setCustomFields(decoded.customFields || DEFAULT_FIELDS)
+      setCategories(decoded.categories || DEFAULT_CATEGORIES)
+      return
+    }
     const snap = store.getSnapshot("defective-item");
     if (snap) {
       setDays(snap.data.days || DEFAULT_DAYS);
@@ -463,35 +463,35 @@ const doExportCSV = () => {
     return 0
   })
   const paretoData = (() => {
-  let running = 0
-  return sortedCategories.map(c => {
-    const total = getRowTotal(c)
-    const pct = allTotal > 0 ? (total / allTotal) * 100 : 0
-    running += pct
-    return {
-      id: c.id,
-      name: c.name,
-      total,
-      pct,
-      cumPct: running
-    }
-  })
-})()
+    let running = 0
+    return sortedCategories.map(c => {
+      const total = getRowTotal(c)
+      const pct = allTotal > 0 ? (total / allTotal) * 100 : 0
+      running += pct
+      return {
+        id: c.id,
+        name: c.name,
+        total,
+        pct,
+        cumPct: running
+      }
+    })
+  })()
 
-const focusDefects = paretoData.filter(x => x.cumPct <= 80)
+  const focusDefects = paretoData.filter(x => x.cumPct <= 80)
 
-const focusCoverage = focusDefects.length > 0
-  ? focusDefects[focusDefects.length - 1].cumPct
-  : 0
+  const focusCoverage = focusDefects.length > 0
+    ? focusDefects[focusDefects.length - 1].cumPct
+    : 0
 
-const dayTotals = days.map(d => ({
-  day: d,
-  total: getColTotal(categories, d)
-}))
+  const dayTotals = days.map(d => ({
+    day: d,
+    total: getColTotal(categories, d)
+  }))
 
-const worstDay = dayTotals.length > 0
-  ? dayTotals.reduce((max, cur) => cur.total > max.total ? cur : max, dayTotals[0])
-  : { day: "", total: 0 }
+  const worstDay = dayTotals.length > 0
+    ? dayTotals.reduce((max, cur) => cur.total > max.total ? cur : max, dayTotals[0])
+    : { day: "", total: 0 }
 
 
 
@@ -527,11 +527,11 @@ const worstDay = dayTotals.length > 0
     doExportPDF,
     setCellValue,
     getShareLink,
-      paretoData,
-  focusDefects,
-  focusCoverage,
-  dayTotals,
-  worstDay,
+    paretoData,
+    focusDefects,
+    focusCoverage,
+    dayTotals,
+    worstDay,
 
   };
 };

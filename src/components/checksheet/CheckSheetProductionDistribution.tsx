@@ -239,12 +239,12 @@ const CheckSheetDistribution = () => {
         <div className="max-h-[520px] overflow-y-auto">
           <table className="w-full text-xs border border-primary table-fixed">
 
-     <thead className="bg-primary text-white top-0 z-10 pointer-events-none">
+            <thead className="bg-primary text-white top-0 z-10 pointer-events-none">
 
               <tr>
-             <th className="px-2 py-2 border border-primary text-left w-[70px] hover:bg-transparent">
-  Dev
-</th>
+                <th className="px-2 py-2 border border-primary text-left w-[70px] hover:bg-transparent">
+                  Dev
+                </th>
 
                 <th className="px-2 py-2 border border-primary text-left w-[110px]">Actual ({l.unit})</th>
                 <th className="px-2 py-2 border border-primary text-center w-[60px]">Cnt</th>
@@ -331,7 +331,8 @@ const CheckSheetDistribution = () => {
 
         </div>
       </div>
-            <div className="p-4 border border-primary rounded bg-primary/5 shadow-md space-y-4">
+      
+      <div className="p-4 border border-primary rounded bg-primary/5 shadow-md space-y-4">
         <div className="text-[15px] font-bold text-primary uppercase tracking-wide">
           Kesimpulan
         </div>
@@ -373,7 +374,7 @@ const CheckSheetDistribution = () => {
                 {(() => {
                   const maxRow = l.rows.reduce((max, cur) =>
                     cur.count > max.count ? cur : max,
-                  { deviation: 0, count: -1 })
+                    { deviation: 0, count: -1 })
                   return maxRow.count <= 0
                     ? "Belum ada nilai yang menonjol."
                     : `Deviasi ${maxRow.deviation} memiliki frekuensi tertinggi (${maxRow.count}).`

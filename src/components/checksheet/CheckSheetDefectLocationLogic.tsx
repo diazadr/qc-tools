@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import { useChecksheetStore } from "../../store/useChecksheetStore"
-import { exportCSV } from "../../utils/dataio/csv"
-import { exportExcel } from "../../utils/dataio/excel"
-import { exportPDF } from "../../utils/dataio/pdf"
+import { exportCSV } from "../../utils/dataio/csv/csv"
+import { exportExcel } from "../../utils/dataio/excel/excel"
+import { exportPDF } from "../../utils/dataio/pdf/pdf"
 
 export interface LocationMark {
   circ: string
@@ -23,9 +23,9 @@ export interface DefectLocationSnapshot {
   locked: boolean
 }
 
-const DEFAULT_CIRC = ["A","B","C","D","E","F","G","H"]
-const DEFAULT_RADIAL = [1,2,3,4,5,6,7,8,9,10]
-const DEFAULT_FIELDS = ["Product","Model","Inspector"]
+const DEFAULT_CIRC = ["A", "B", "C", "D", "E", "F", "G", "H"]
+const DEFAULT_RADIAL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+const DEFAULT_FIELDS = ["Product", "Model", "Inspector"]
 const DEFAULT_METADATA: Record<string, string> = {
   Product: "",
   Model: "",
@@ -45,7 +45,7 @@ export const useDefectLocationLogic = () => {
   const [newField, setNewField] = useState("")
   const [defectType, setDefectType] = useState("")
   const [comment, setComment] = useState("")
-  const [severity, setSeverity] = useState<"Minor"|"Major"|"Critical">("Minor")
+  const [severity, setSeverity] = useState<"Minor" | "Major" | "Critical">("Minor")
   const [selectedCirc, setSelectedCirc] = useState<string | null>(null)
   const [selectedRad, setSelectedRad] = useState<number | null>(null)
   const [manual, setManual] = useState(0)
@@ -56,49 +56,49 @@ export const useDefectLocationLogic = () => {
 
   const metadataFilled =
     customFields.every(f => (metadata[f] ?? "").trim())
-const getCellDefect = (c: string, r: number) =>
-  marks.find(m => m.circ === c && m.rad === r)?.defect || ""
-const getCellSeverity = (c: string, r: number) =>
-  marks.find(m => m.circ === c && m.rad === r)?.severity || ""
+  const getCellDefect = (c: string, r: number) =>
+    marks.find(m => m.circ === c && m.rad === r)?.defect || ""
+  const getCellSeverity = (c: string, r: number) =>
+    marks.find(m => m.circ === c && m.rad === r)?.severity || ""
 
-const deleteCircular = (c: string) => {
-  if (locked) return
-setCircular(prev => {
-  const updated = prev.filter(x => x !== c)
-  saveSnapshot(updated, radial, marks)
-  return updated
-})
+  const deleteCircular = (c: string) => {
+    if (locked) return
+    setCircular(prev => {
+      const updated = prev.filter(x => x !== c)
+      saveSnapshot(updated, radial, marks)
+      return updated
+    })
 
-setMarks(prev => {
-  const updated = prev.filter(m => m.circ !== c)
-  saveSnapshot(circular, radial, updated)
-  return updated
-})
+    setMarks(prev => {
+      const updated = prev.filter(m => m.circ !== c)
+      saveSnapshot(circular, radial, updated)
+      return updated
+    })
 
-}
+  }
 
-const deleteRadial = (r: number) => {
-  if (locked) return
-  setRadial(prev => prev.filter(x => x !== r))
-  setMarks(prev => prev.filter(m => m.rad !== r))
-  if (selectedRad === r) setSelectedRad(null)
-  saveSnapshot()
-}
+  const deleteRadial = (r: number) => {
+    if (locked) return
+    setRadial(prev => prev.filter(x => x !== r))
+    setMarks(prev => prev.filter(m => m.rad !== r))
+    if (selectedRad === r) setSelectedRad(null)
+    saveSnapshot()
+  }
 
-const saveSnapshot = (
-  c = circular,
-  r = radial,
-  m = marks
-) => {
-  store.setSnapshot("defect-location", {
-    circular: c,
-    radial: r,
-    marks: m,
-    customFields,
-    metadata,
-    locked
-  })
-}
+  const saveSnapshot = (
+    c = circular,
+    r = radial,
+    m = marks
+  ) => {
+    store.setSnapshot("defect-location", {
+      circular: c,
+      radial: r,
+      marks: m,
+      customFields,
+      metadata,
+      locked
+    })
+  }
 
 
   const autoLockIfDataExists = () => {
@@ -116,23 +116,23 @@ const saveSnapshot = (
   const setCellValue = (c: string, r: number, val: number) => {
     if (!defectType) return
     setMarks(prev => {
-      const exist = prev.find(m => m.circ===c && m.rad===r)
+      const exist = prev.find(m => m.circ === c && m.rad === r)
       if (!exist) return [...prev, {
-        circ:c,
-        rad:r,
-        count:val,
-        defect:defectType,
-        severity:severity,
-        comment:comment,
-        timestamp:Date.now()
+        circ: c,
+        rad: r,
+        count: val,
+        defect: defectType,
+        severity: severity,
+        comment: comment,
+        timestamp: Date.now()
       }]
-      return prev.map(m => m===exist ? {
+      return prev.map(m => m === exist ? {
         ...exist,
-        count:val,
-        defect:defectType,
-        severity:severity,
-        comment:comment,
-        timestamp:Date.now()
+        count: val,
+        defect: defectType,
+        severity: severity,
+        comment: comment,
+        timestamp: Date.now()
       } : m)
     })
     saveSnapshot()
@@ -141,49 +141,49 @@ const saveSnapshot = (
 
   const increment = () => {
     if (!defectType || locked || !selectedCirc || !selectedRad) return
-    setCellValue(selectedCirc, selectedRad, getCell(selectedCirc,selectedRad)+1)
+    setCellValue(selectedCirc, selectedRad, getCell(selectedCirc, selectedRad) + 1)
   }
 
   const decrement = () => {
     if (locked || !selectedCirc || !selectedRad) return
-    const curr = getCell(selectedCirc,selectedRad)
-    if (curr===0) return
-    setCellValue(selectedCirc, selectedRad, curr-1)
+    const curr = getCell(selectedCirc, selectedRad)
+    if (curr === 0) return
+    setCellValue(selectedCirc, selectedRad, curr - 1)
   }
 
   const applyManual = () => {
     if (!defectType || locked || !selectedCirc || !selectedRad) return
-    if (manual<0) return
+    if (manual < 0) return
     setCellValue(selectedCirc, selectedRad, manual)
     setManual(0)
   }
 
   const totalRow = (c: string) =>
-    radial.reduce((s,r)=>s + getCell(c,r), 0)
+    radial.reduce((s, r) => s + getCell(c, r), 0)
 
   const totalCol = (r: number) =>
-    circular.reduce((s,c)=>s + getCell(c,r), 0)
+    circular.reduce((s, c) => s + getCell(c, r), 0)
 
-  const totalAll = marks.reduce((s,m)=>s+m.count, 0)
+  const totalAll = marks.reduce((s, m) => s + m.count, 0)
 
   const getDefectList = () => {
-    const map = new Map<string,number>()
+    const map = new Map<string, number>()
     marks.forEach(m => {
-      map.set(m.defect,(map.get(m.defect)||0)+m.count)
+      map.set(m.defect, (map.get(m.defect) || 0) + m.count)
     })
-    return Array.from(map.entries()).sort((a,b)=>b[1]-a[1])
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1])
   }
 
   const getSeverityTotals = () => {
-    const r = {Minor:0,Major:0,Critical:0}
-    marks.forEach(m => r[m.severity]+=m.count)
+    const r = { Minor: 0, Major: 0, Critical: 0 }
+    marks.forEach(m => r[m.severity] += m.count)
     return r
   }
 
-  const sortedCircular = [...circular].sort((a,b)=>{
+  const sortedCircular = [...circular].sort((a, b) => {
     if (!sortKey) return 0
-    if (sortKey==="circ") return sortAsc ? a.localeCompare(b) : b.localeCompare(a)
-    if (sortKey==="total") {
+    if (sortKey === "circ") return sortAsc ? a.localeCompare(b) : b.localeCompare(a)
+    if (sortKey === "total") {
       return sortAsc ? totalRow(a) - totalRow(b) : totalRow(b) - totalRow(a)
     }
     return 0
@@ -198,19 +198,19 @@ const saveSnapshot = (
     const arr = circular.map(c => ({
       circ: c,
       total: totalRow(c),
-      pct: totalAll>0?(totalRow(c)/totalAll)*100:0
-    })).sort((a,b)=>b.total-a.total)
+      pct: totalAll > 0 ? (totalRow(c) / totalAll) * 100 : 0
+    })).sort((a, b) => b.total - a.total)
     let running = 0
     return arr.map(x => {
-      running+=x.pct
-      return {...x,cumPct:running}
+      running += x.pct
+      return { ...x, cumPct: running }
     })
   })()
 
-  const focusLocations = paretoData.filter(x=>x.cumPct<=80)
+  const focusLocations = paretoData.filter(x => x.cumPct <= 80)
 
-  const worstLocation = circular.reduce((max,c)=>{
-    return totalRow(c)>totalRow(max)?c:max
+  const worstLocation = circular.reduce((max, c) => {
+    return totalRow(c) > totalRow(max) ? c : max
   }, circular[0])
 
   const addField = () => {
@@ -237,107 +237,138 @@ const saveSnapshot = (
     setMetadata(m)
     saveSnapshot()
   }
-function generateNextCircularLabel(arr: string[]) {
-  const last = arr[arr.length-1]
-  if (/^[A-Z]$/.test(last)) {
-    return String.fromCharCode(last.charCodeAt(0)+1)
-  }
-  return last + "_new"
-}
-
-const addCircular = () => {
-  if (locked) return
-  const next = generateNextCircularLabel(circular)
-  setCircular([...circular, next])
-  saveSnapshot()
-}
-
-
-
-const addRadial = () => {
-  if (locked) return
-  const max = Math.max(...radial)
-  setRadial([...radial, max + 1])
-  saveSnapshot()
-}
-
-
-const renameCircular = (oldName: string, newName: string) => {
-  if (locked) return
-  if (!newName.trim()) return
-  if (circular.includes(newName)) return
-setCircular(prev => {
-  const updated = prev.map(c => c === oldName ? newName : c)
-  saveSnapshot(updated, radial, marks)
-  return updated
-})
-
-setMarks(prev => {
-  const updated = prev.map(m => m.circ === oldName ? {...m, circ:newName} : m)
-  saveSnapshot(circular, radial, updated)
-  return updated
-})
-
-}
-const renameRadial = (oldVal: number, newVal: number) => {
-  if (locked) return
-  if (radial.includes(newVal)) return
-  if (isNaN(newVal)) return
-
-setRadial(prev => {
-  const updated = prev.map(r => r === oldVal ? newVal : r)
-  saveSnapshot(circular, updated, marks)
-  return updated
-})
-
-setMarks(prev => {
-  const updated = prev.map(m => m.rad === oldVal ? {...m, rad:newVal} : m)
-  saveSnapshot(circular, radial, updated)
-  return updated
-})
-
-}
-
-
-  const getShareLink = () => {
-    const snapshot = {
-      circular,
-      radial,
-      marks,
-      customFields,
-      metadata,
-      locked
+  function generateNextCircularLabel(arr: string[]) {
+    const last = arr[arr.length - 1]
+    if (/^[A-Z]$/.test(last)) {
+      return String.fromCharCode(last.charCodeAt(0) + 1)
     }
-    const json = JSON.stringify(snapshot)
-    const base64 = btoa(json)
-    return `${window.location.origin}/?loc=${base64}`
+    return last + "_new"
   }
 
-  useEffect(()=>{
-    const params = new URLSearchParams(window.location.search)
-    const encoded = params.get("loc")
-    if (encoded) {
-      const d = JSON.parse(atob(encoded))
-      const filteredFields = d.customFields?.filter((x: string) => x !== "Date") || []
-      setCircular(d.circular)
-      setRadial(d.radial)
-      setMarks(d.marks)
-      setCustomFields(filteredFields)
-      setMetadata(d.metadata)
-      setLocked(d.locked || false)
+  const addCircular = () => {
+    if (locked) return
+    const next = generateNextCircularLabel(circular)
+    setCircular([...circular, next])
+    saveSnapshot()
+  }
+
+
+
+  const addRadial = () => {
+    if (locked) return
+    const max = Math.max(...radial)
+    setRadial([...radial, max + 1])
+    saveSnapshot()
+  }
+
+
+  const renameCircular = (oldName: string, newName: string) => {
+    if (locked) return
+    if (!newName.trim()) return
+    if (circular.includes(newName)) return
+    setCircular(prev => {
+      const updated = prev.map(c => c === oldName ? newName : c)
+      saveSnapshot(updated, radial, marks)
+      return updated
+    })
+
+    setMarks(prev => {
+      const updated = prev.map(m => m.circ === oldName ? { ...m, circ: newName } : m)
+      saveSnapshot(circular, radial, updated)
+      return updated
+    })
+
+  }
+  const renameRadial = (oldVal: number, newVal: number) => {
+    if (locked) return
+    if (radial.includes(newVal)) return
+    if (isNaN(newVal)) return
+
+    setRadial(prev => {
+      const updated = prev.map(r => r === oldVal ? newVal : r)
+      saveSnapshot(circular, updated, marks)
+      return updated
+    })
+
+    setMarks(prev => {
+      const updated = prev.map(m => m.rad === oldVal ? { ...m, rad: newVal } : m)
+      saveSnapshot(circular, radial, updated)
+      return updated
+    })
+
+  }
+
+
+const encodeURLSafe = (str: string) =>
+  btoa(str)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "")
+
+const getShareLink = () => {
+  const snapshot = {
+    circular,
+    radial,
+    marks,
+    customFields,
+    metadata,
+    locked
+  }
+
+  const json = JSON.stringify(snapshot)
+  const encoded = encodeURLSafe(json)
+
+  // gunakan path SEKARANG, tidak reset ke '/'
+  const baseURL = window.location.href.split("?")[0]
+
+  return `${baseURL}?loc=${encoded}`
+}
+const decodeURLSafe = (str: string) => {
+  const pad = str.length % 4 === 0 ? "" : "=".repeat(4 - (str.length % 4))
+  const base64 = str.replace(/-/g, "+").replace(/_/g, "/") + pad
+  return atob(base64)
+}
+
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search)
+  const encoded = params.get("loc")
+
+  if (encoded) {
+    let d = null
+    try {
+      d = JSON.parse(decodeURLSafe(encoded))
+    } catch (e) {
+      console.error("Invalid share link")
       return
     }
-    const snap = store.getSnapshot("defect-location")
-    if(!snap) return
-    const d = snap.data as DefectLocationSnapshot
-    const filteredFields = d.customFields?.filter(x => x !== "Date") || []
-    setCircular(d.circular)
-    setRadial(d.radial)
-    setMarks(d.marks)
-    setCustomFields(filteredFields)
-    setMetadata(d.metadata)
-    setLocked(d.locked || false)
-  },[])
+
+    const filteredFields = d.customFields?.filter((x: string) => x !== "Date") || []
+
+    setCircular(d.circular || DEFAULT_CIRC)
+    setRadial(d.radial || DEFAULT_RADIAL)
+    setMarks(d.marks || [])
+    setCustomFields(filteredFields || DEFAULT_FIELDS)
+    setMetadata(d.metadata || DEFAULT_METADATA)
+    setLocked(d.locked ?? false)
+
+    return
+  }
+
+  const snap = store.getSnapshot("defect-location")
+  if (!snap) return
+
+  const d = snap.data as DefectLocationSnapshot
+  const filteredFields = d.customFields?.filter(x => x !== "Date") || []
+
+  setCircular(d.circular || DEFAULT_CIRC)
+  setRadial(d.radial || DEFAULT_RADIAL)
+  setMarks(d.marks || [])
+  setCustomFields(filteredFields || DEFAULT_FIELDS)
+  setMetadata(d.metadata || DEFAULT_METADATA)
+  setLocked(d.locked ?? false)
+}, [])
+
 
   const doExportCSV = () => {
     exportCSV(
@@ -389,36 +420,36 @@ setMarks(prev => {
 
   return {
     circular, radial, marks,
-  selectedCirc, setSelectedCirc,
-  selectedRad, setSelectedRad,
-  manual, setManual,
-  locked, setLocked,
-  defectType, setDefectType,
-  comment, setComment,
-  severity, setSeverity,
-  metadata, setMetadata,
-  customFields, setCustomFields,
-  newField, setNewField,
-  addField, removeField,
-  getCell, setCellValue,
-  increment, decrement,
-  applyManual,
-  totalRow, totalCol, totalAll,
-  addCircular, addRadial,
-  renameCircular, renameRadial,
-  deleteCircular, deleteRadial,
-  sortKey, sortAsc, setSort,
-  sortedCircular,
-  paretoData,
-  focusLocations,
-  worstLocation,
-  getDefectList,
-  getSeverityTotals,
-  metadataFilled,
-  cellRefs, cellBuffer, setCellBuffer,
-  getShareLink,
-  exportSnapshot: saveSnapshot,
-  doExportCSV, doExportExcel, doExportPDF, getCellDefect,
-getCellSeverity
+    selectedCirc, setSelectedCirc,
+    selectedRad, setSelectedRad,
+    manual, setManual,
+    locked, setLocked,
+    defectType, setDefectType,
+    comment, setComment,
+    severity, setSeverity,
+    metadata, setMetadata,
+    customFields, setCustomFields,
+    newField, setNewField,
+    addField, removeField,
+    getCell, setCellValue,
+    increment, decrement,
+    applyManual,
+    totalRow, totalCol, totalAll,
+    addCircular, addRadial,
+    renameCircular, renameRadial,
+    deleteCircular, deleteRadial,
+    sortKey, sortAsc, setSort,
+    sortedCircular,
+    paretoData,
+    focusLocations,
+    worstLocation,
+    getDefectList,
+    getSeverityTotals,
+    metadataFilled,
+    cellRefs, cellBuffer, setCellBuffer,
+    getShareLink,
+    exportSnapshot: saveSnapshot,
+    doExportCSV, doExportExcel, doExportPDF, getCellDefect,
+    getCellSeverity
   }
 }
