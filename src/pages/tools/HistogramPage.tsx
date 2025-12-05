@@ -113,7 +113,7 @@ const HistogramPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4">
         <div className="relative p-3 border border-border rounded bg-card shadow-sm space-y-4">
 
           <div className="font-medium text-sm">Konfigurasi Histogram</div>
@@ -335,7 +335,7 @@ const HistogramPage = () => {
           </button>
 
         </div>
-        <div className="p-3 border border-border rounded bg-card shadow-sm space-y-4">
+        {/* <div className="p-3 border border-border rounded bg-card shadow-sm space-y-4">
           <div className="font-medium text-sm">Capability (Cp / Cpk)</div>
           <div className="grid grid-cols-2 gap-2">
             <input
@@ -374,7 +374,7 @@ const HistogramPage = () => {
 
           <div className="grid grid-cols-2 gap-2">
           </div>
-        </div>
+        </div> */}
 
       </div>
 
