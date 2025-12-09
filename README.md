@@ -23,13 +23,13 @@ This project was developed for the **Statistics & Probability** course and imple
 ## Demo
 
 ### Landing Page
-<img src="https://github.com/user-attachments/assets/4c27ffdc-f858-4984-9886-cfa7bc5665b9" width="600">
+<img src="hhttps://github.com/user-attachments/assets/070d2a5f-6cb2-4602-bb4f-dcb1a8cdc443" width="600">
 
 ### Tools Page
-<img src="https://github.com/user-attachments/assets/219f2f04-5c2b-4b2a-bfad-6814752c7ad0" width="600">
+<img src="https://github.com/user-attachments/assets/32656cd4-d373-4575-9454-6b3084f8cba9" width="600">
 
 ### Theory Page
-<img src="https://github.com/user-attachments/assets/ba957f7c-300a-479e-b09a-663e8dd8a395" width="600">
+<img src="https://github.com/user-attachments/assets/55ef440c-f13f-47f9-86a4-d929db09b362" width="600">
 
 ## Features
 - Export to **PDF**
