@@ -1,73 +1,66 @@
-# React + TypeScript + Vite
+# QC Tools
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Project Status](https://img.shields.io/badge/status-completed-brightgreen)
 
-Currently, two official plugins are available:
+This project was developed for the **Statistics & Probability** course and implements several **Quality Control (QC) tools** commonly used in industrial data analysis.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies Used
+- **React JS** for the user interface and interaction
+- **Tailwind CSS** for styling and layout
+- **JavaScript** for frontend logic
 
-## React Compiler
+## Tools
+1. **Checksheet**  
+   Based on the reference book *Statistical Methods for Quality Improvement* by **Hitoshi Kume**
+2. **Pareto**
+3. **Histogram**
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+## Pages
+- **Landing Page**
+- **Tools**
+- **Theory**
 
-## Expanding the ESLint configuration
+## Demo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Landing Page
+<img src="https://github.com/user-attachments/assets/4c27ffdc-f858-4984-9886-cfa7bc5665b9" width="600">
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Tools Page
+<img src="https://github.com/user-attachments/assets/219f2f04-5c2b-4b2a-bfad-6814752c7ad0" width="600">
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Theory Page
+<img src="https://github.com/user-attachments/assets/ba957f7c-300a-479e-b09a-663e8dd8a395" width="600">
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Features
+- Export to **PDF**
+- Export to **Excel**
+- Share link using **Base64 encoding**
+- Responsive and simple user interface
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Setup
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Install Node.js  
+   Download it from the official Node.js website.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. Clone the repository
+   ```bash
+   git clone <repository_url>
+   cd qc-tools
+   ```
+
+3. Install dependencies
+   ```bash
+   npm install
+   ```
+
+4. Run the application
+   ```bash
+   npm run dev
+   ```
+   The application will be available at localhost:5173.
+
+## Project Status
+This project is **completed** and will not be further developed.
+
+## Contributions
+Feel free to submit issues or contribute by creating pull requests.
