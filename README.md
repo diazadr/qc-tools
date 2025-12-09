@@ -23,7 +23,7 @@ This project was developed for the **Statistics & Probability** course and imple
 ## Demo
 
 ### Landing Page
-<img src="hhttps://github.com/user-attachments/assets/070d2a5f-6cb2-4602-bb4f-dcb1a8cdc443" width="600">
+<img src="https://github.com/user-attachments/assets/070d2a5f-6cb2-4602-bb4f-dcb1a8cdc443" width="600">
 
 ### Tools Page
 <img src="https://github.com/user-attachments/assets/32656cd4-d373-4575-9454-6b3084f8cba9" width="600">
