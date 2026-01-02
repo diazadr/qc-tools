@@ -71,5 +71,11 @@ This project was developed for the **Statistics & Probability** course and imple
 ## Project Status
 This project is **completed** and will not be further developed.
 
+## Acknowledgements
+
+We would like to express our sincere appreciation to **Kelompok 1** for their valuable contributions and collaboration in the development of this project. Their work on the statistical analysis, documentation, and implementation of Quality Control tools has been an essential part of the successful completion of this project.
+
+Thank you for your dedication, teamwork, and commitment throughout the development process.
+
 ## Contributions
 Feel free to submit issues or contribute by creating pull requests.
