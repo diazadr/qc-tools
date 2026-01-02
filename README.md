@@ -2,6 +2,15 @@
 
 ![Project Status](https://img.shields.io/badge/status-completed-brightgreen)
 
+## Project Documentation
+
+**Manual Book**  
+[Kelompok 1 – Statistika 3 (Checksheet, Pareto, Histogram) – QC User Guide Book](https://github.com/user-attachments/files/24409721/Kelompok.1.Statistika.3.Tools.Checksheet.Pareto.Histogram.QC.User.Guide.Book.pdf)
+
+**Explanation Document**  
+[Kelompok 1 – Statistika 3 (Checksheet, Pareto, Histogram) – 7 QC Tools](https://github.com/user-attachments/files/24409725/Kelompok.1.Statistika.3.Checksheet.Pareto.Histogram.7QC.Tools.pdf)
+
+
 This project was developed for the **Statistics & Probability** course and implements several **Quality Control (QC) tools** commonly used in industrial data analysis.
 
 ## Technologies Used
